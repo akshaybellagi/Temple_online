@@ -1,0 +1,138 @@
+.about-header-section {
+  padding: 60px 20px 40px;
+  background: linear-gradient(180deg, #f0f0f0 0%, #e8e8e8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.content-text h2 {
+  color: #dc143c;
+  margin-bottom: 1.5rem;
+}
+
+.content-text p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.content-image .placeholder-image {
+  background: #ddd;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #666;
+}
+
+.about-page .bg-light {
+  background: linear-gradient(180deg, #e8e8e8 0%, #f0f0f0 100%);
+}
+
+.about-page .section {
+  background: linear-gradient(180deg, #e8e8e8 0%, #f0f0f0 100%);
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.mission-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.mission-card h3 {
+  color: #dc143c;
+  margin-bottom: 1rem;
+}
+
+.timeline {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.timeline-item {
+  position: relative;
+  padding: 2rem 0 2rem 3rem;
+  border-left: 3px solid #dc143c;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 2rem;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #dc143c;
+}
+
+.timeline-content h3 {
+  color: #dc143c;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .mission-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .mission-card {
+    padding: 1.5rem;
+  }
+
+  .timeline-item {
+    padding: 1.5rem 0 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-header-section {
+    padding: 40px 15px 30px;
+  }
+
+  .content-text h2 {
+    font-size: 1.8rem;
+  }
+
+  .content-text p {
+    font-size: 1rem;
+  }
+
+  .mission-card {
+    padding: 1.2rem;
+  }
+
+  .mission-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .timeline-item {
+    padding: 1rem 0 1rem 1.5rem;
+  }
+
+  .timeline-content h3 {
+    font-size: 1.1rem;
+  }
+}
