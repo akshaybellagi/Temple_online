@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaCalendarAlt, FaHourglassHalf, FaDonate, FaUsers, FaHome, FaChurch, FaClipboardList, FaImage, FaEdit, FaUser, FaCog } from 'react-icons/fa';
+import { FaCalendarAlt, FaHourglassHalf, FaDonate, FaUsers, FaHome, FaChurch, FaImage, FaUser } from 'react-icons/fa';
+import { GiTempleGate } from 'react-icons/gi';
 import './AdminDashboard.css';
 
 function AdminDashboard() {
@@ -21,19 +22,17 @@ function AdminDashboard() {
   const stats = [
     { title: 'Total Bookings', value: '156', icon: FaCalendarAlt, color: '#4CAF50' },
     { title: 'Pending Approvals', value: '12', icon: FaHourglassHalf, color: '#FF9800' },
-    { title: 'Total Donations', value: '₹2.5L', icon: FaDonate, color: '#2196F3' },
+    { title: 'E-Hundi Collections', value: '₹2.5L', icon: FaDonate, color: '#2196F3' },
     { title: 'Active Users', value: '89', icon: FaUsers, color: '#9C27B0' }
   ];
 
   const managementSections = [
     { title: 'Room Management', icon: FaHome, link: '/admin/rooms', description: 'Manage room availability and pricing' },
     { title: 'Marriage Hall', icon: FaChurch, link: '/admin/halls', description: 'Manage marriage hall bookings' },
-    { title: 'Donations', icon: FaDonate, link: '/admin/donations', description: 'View and manage donations' },
-    { title: 'Bookings', icon: FaClipboardList, link: '/admin/bookings', description: 'View all bookings and reservations' },
+    { title: 'Seva Bookings', icon: GiTempleGate, link: '/admin/sevas', description: 'Manage seva bookings and schedules' },
+    { title: 'E-Hundi', icon: FaDonate, link: '/admin/donations', description: 'Manage online donations and E-Hundi' },
     { title: 'Gallery', icon: FaImage, link: '/admin/gallery', description: 'Manage gallery images' },
-    { title: 'Content', icon: FaEdit, link: '/admin/content', description: 'Edit website content' },
-    { title: 'Users', icon: FaUser, link: '/admin/users', description: 'Manage user accounts' },
-    { title: 'Settings', icon: FaCog, link: '/admin/settings', description: 'System settings and configuration' }
+    { title: 'Users', icon: FaUser, link: '/admin/users', description: 'Manage user accounts' }
   ];
 
   return (
@@ -87,7 +86,7 @@ function AdminDashboard() {
             <div className="activity-item">
               <span className="activity-icon"><FaDonate /></span>
               <div className="activity-content">
-                <p><strong>Donation Received</strong></p>
+                <p><strong>E-Hundi Received</strong></p>
                 <p>₹5,000 for Annadhana</p>
                 <span className="activity-time">5 hours ago</span>
               </div>

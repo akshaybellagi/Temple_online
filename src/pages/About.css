@@ -405,3 +405,156 @@
     font-size: 1.8rem;
   }
 }
+
+/* Additional Mobile Responsive Improvements */
+@media (max-width: 360px) {
+  .about-hero {
+    height: 250px;
+  }
+
+  .about-hero h1 {
+    font-size: 1.4rem;
+  }
+
+  .about-hero p {
+    font-size: 0.9rem;
+  }
+
+  .intro-section,
+  .history-section,
+  .mission-section,
+  .timeline-section,
+  .cta-section {
+    padding: 2.5rem 0;
+  }
+
+  .intro-icon {
+    font-size: 3rem;
+  }
+
+  .intro-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .intro-text {
+    font-size: 0.95rem;
+  }
+
+  .content-text h2 {
+    font-size: 1.5rem;
+  }
+
+  .content-text p {
+    font-size: 1rem;
+  }
+
+  .stat-item {
+    padding: 1.2rem;
+  }
+
+  .stat-item h3 {
+    font-size: 2rem;
+  }
+
+  .stat-item p {
+    font-size: 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1.7rem;
+  }
+
+  .mission-card {
+    padding: 1.5rem;
+  }
+
+  .card-icon {
+    font-size: 2.5rem;
+  }
+
+  .mission-card h3 {
+    font-size: 1.3rem;
+  }
+
+  .mission-card p {
+    font-size: 1rem;
+  }
+
+  .timeline-item {
+    padding: 0 0 2rem 50px;
+  }
+
+  .timeline-content {
+    padding: 1.5rem;
+  }
+
+  .timeline-content h3 {
+    font-size: 1.4rem;
+  }
+
+  .timeline-content p {
+    font-size: 1rem;
+  }
+
+  .cta-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .cta-content p {
+    font-size: 1.1rem;
+  }
+
+  .btn {
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    min-height: 48px;
+    padding: 1rem 2.5rem;
+  }
+
+  .mission-card {
+    -webkit-tap-highlight-color: rgba(220, 20, 60, 0.1);
+  }
+}
+
+/* Improve timeline on very small screens */
+@media (max-width: 320px) {
+  .timeline::before {
+    left: 10px;
+  }
+
+  .timeline-marker {
+    left: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .timeline-item {
+    padding: 0 0 1.5rem 40px;
+  }
+
+  .timeline-content {
+    padding: 1.2rem;
+  }
+}
+
+/* Better content grid on tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .content-grid {
+    gap: 3rem;
+  }
+
+  .content-image .image-placeholder {
+    height: 350px;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}

@@ -7,8 +7,8 @@ function About() {
       <section className="about-hero">
         <div className="hero-overlay">
           <div className="container">
-            <h1>About Sri Raghavendra Swamy Matha</h1>
-            <p>A Sacred Journey of Devotion, Service, and Spiritual Enlightenment</p>
+            <h1>About Our Temple</h1>
+            <p>A Place of Peace, Devotion, and Community Service</p>
           </div>
         </div>
       </section>
@@ -19,11 +19,11 @@ function About() {
             <div className="intro-icon">
               <FaOm />
             </div>
-            <h2>Welcome to Our Sacred Abode</h2>
+            <h2>Welcome to Our Temple</h2>
             <p className="intro-text">
-              Sri Raghavendra Swamy Matha stands as a beacon of spiritual light, dedicated to preserving ancient Vedic traditions 
-              while serving the modern devotee community. Our matha has been a center of divine grace, spiritual learning, 
-              and selfless service for generations.
+              Our temple stands as a beacon of spiritual light, dedicated to preserving ancient traditions 
+              while serving the modern community. We have been a center of divine grace, spiritual learning, 
+              and selfless service for many years, welcoming devotees from all walks of life.
             </p>
           </div>
         </div>
@@ -40,21 +40,22 @@ function About() {
             <div className="content-text">
               <h2>Our Heritage</h2>
               <p>
-                Founded with the divine blessings of Sri Raghavendra Swamy, our matha has been a pilgrimage destination 
-                for devotees seeking spiritual solace and divine intervention. The sacred presence of our revered saint 
-                continues to bless all who visit with an open heart.
+                Founded with divine blessings, our temple has been a destination for devotees seeking spiritual 
+                solace and peace. The sacred atmosphere continues to bless all who visit with an open heart 
+                and sincere devotion.
               </p>
               <p>
-                Through decades of dedicated service, we have maintained the sanctity of our traditions while embracing 
-                devotees from all walks of life. Our doors remain open to all seekers of truth and spiritual wisdom.
+                Through years of dedicated service, we have maintained the sanctity of our traditions while 
+                embracing devotees from all backgrounds. Our doors remain open to all seekers of truth, 
+                peace, and spiritual wisdom.
               </p>
               <div className="stats-row">
                 <div className="stat-item">
-                  <h3>100+</h3>
+                  <h3>50+</h3>
                   <p>Years of Service</p>
                 </div>
                 <div className="stat-item">
-                  <h3>50K+</h3>
+                  <h3>25K+</h3>
                   <p>Annual Visitors</p>
                 </div>
                 <div className="stat-item">
@@ -76,21 +77,21 @@ function About() {
                 <FaBook />
               </div>
               <h3>Spiritual Education</h3>
-              <p>Imparting authentic Vedic knowledge and spiritual teachings to guide seekers on their path to enlightenment</p>
+              <p>Providing spiritual knowledge and teachings to guide seekers on their path to inner peace and enlightenment</p>
             </div>
             <div className="mission-card">
               <div className="card-icon">
                 <FaHandsHelping />
               </div>
               <h3>Community Service</h3>
-              <p>Serving humanity through charitable activities, food distribution, and support for the underprivileged</p>
+              <p>Serving the community through charitable activities, food distribution, and support for those in need</p>
             </div>
             <div className="mission-card">
               <div className="card-icon">
                 <FaHeart />
               </div>
               <h3>Devotional Practice</h3>
-              <p>Fostering deep devotion through daily rituals, festivals, and spiritual programs throughout the year</p>
+              <p>Fostering devotion through daily worship, festivals, and spiritual programs throughout the year</p>
             </div>
             <div className="mission-card">
               <div className="card-icon">
@@ -105,31 +106,31 @@ function About() {
 
       <section className="section timeline-section">
         <div className="container">
-          <h2 className="section-title">Guru Parampara</h2>
-          <p className="section-subtitle">Our Sacred Lineage of Spiritual Masters</p>
+          <h2 className="section-title">Our Journey</h2>
+          <p className="section-subtitle">Milestones in Our Temple's History</p>
           <div className="timeline">
             <div className="timeline-item">
               <div className="timeline-marker"></div>
               <div className="timeline-content">
-                <h3>Sri Raghavendra Swamy</h3>
-                <span className="timeline-date">1595 - 1671</span>
-                <p>The divine incarnation who established the foundation of our spiritual lineage with his miraculous deeds and profound teachings</p>
+                <h3>Foundation</h3>
+                <span className="timeline-date">1970s</span>
+                <p>The temple was established with the vision of creating a spiritual sanctuary for the community, built on principles of devotion and service</p>
               </div>
             </div>
             <div className="timeline-item">
               <div className="timeline-marker"></div>
               <div className="timeline-content">
-                <h3>Successive Pontiffs</h3>
-                <span className="timeline-date">17th - 19th Century</span>
-                <p>Generations of enlightened masters who carried forward the sacred traditions and expanded the reach of divine grace</p>
+                <h3>Expansion</h3>
+                <span className="timeline-date">1990s - 2000s</span>
+                <p>Major renovations and expansions were undertaken to accommodate the growing community and enhance facilities for devotees</p>
               </div>
             </div>
             <div className="timeline-item">
               <div className="timeline-marker"></div>
               <div className="timeline-content">
                 <h3>Modern Era</h3>
-                <span className="timeline-date">20th Century - Present</span>
-                <p>Continuing the legacy with contemporary outreach while maintaining the purity of ancient spiritual practices</p>
+                <span className="timeline-date">2010 - Present</span>
+                <p>Embracing technology and modern amenities while preserving traditional values, making spiritual services accessible to all</p>
               </div>
             </div>
           </div>
@@ -139,8 +140,8 @@ function About() {
       <section className="section cta-section">
         <div className="container">
           <div className="cta-content">
-            <h2>Experience Divine Blessings</h2>
-            <p>Visit us to experience the sacred atmosphere and receive the blessings of Sri Raghavendra Swamy</p>
+            <h2>Experience Peace and Devotion</h2>
+            <p>Visit us to experience the sacred atmosphere and find inner peace in our spiritual sanctuary</p>
             <div className="cta-buttons">
               <a href="/contact" className="btn btn-primary">Plan Your Visit</a>
               <a href="/services" className="btn btn-secondary">Our Services</a>

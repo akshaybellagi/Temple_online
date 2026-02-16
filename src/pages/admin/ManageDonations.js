@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
+import Receipt from '../../components/Receipt';
 import './AdminManage.css';
 
 function ManageDonations() {
@@ -13,8 +14,12 @@ function ManageDonations() {
   ]);
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
+  const [showReceipt, setShowReceipt] = useState(false);
 
-  const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+  const totalDonations = donations.reduce((sum, d) => {
+    const amount = typeof d.amount === 'number' ? d.amount : parseFloat(d.amount.replace(/[₹,]/g, '')) || 0;
+    return sum + amount;
+  }, 0);
 
   const handleView = (donation) => {
     setCurrentDonation(donation);
@@ -22,7 +27,15 @@ function ManageDonations() {
   };
 
   const handleReceipt = (donation) => {
-    alert(`Generating receipt for ${donation.donor}\nAmount: ₹${donation.amount}\nCategory: ${donation.category}`);
+    // Format donation data to match receipt component expectations
+    const formattedDonation = {
+      ...donation,
+      type: 'Donation',
+      name: donation.name || donation.donor,
+      amount: typeof donation.amount === 'number' ? `₹${donation.amount.toLocaleString()}` : donation.amount
+    };
+    setCurrentDonation(formattedDonation);
+    setShowReceipt(true);
   };
 
   const handleDelete = (id) => {
@@ -86,9 +99,9 @@ function ManageDonations() {
               {donations.map(donation => (
                 <tr key={donation.id}>
                   <td>#{donation.id}</td>
-                  <td>{donation.donor}</td>
-                  <td>{donation.category}</td>
-                  <td>₹{donation.amount.toLocaleString()}</td>
+                  <td>{donation.name || donation.donor}</td>
+                  <td>{donation.purpose || donation.category}</td>
+                  <td>{typeof donation.amount === 'number' ? `₹${donation.amount.toLocaleString()}` : donation.amount}</td>
                   <td>{donation.date}</td>
                   <td>
                     <span className={`status-badge ${donation.status.toLowerCase()}`}>
@@ -114,9 +127,13 @@ function ManageDonations() {
             <h2>Donation Details</h2>
             <div className="booking-details">
               <p><strong>ID:</strong> #{currentDonation.id}</p>
-              <p><strong>Donor:</strong> {currentDonation.donor}</p>
-              <p><strong>Category:</strong> {currentDonation.category}</p>
-              <p><strong>Amount:</strong> ₹{currentDonation.amount.toLocaleString()}</p>
+              <p><strong>Donor Name:</strong> {currentDonation.name || currentDonation.donor}</p>
+              {currentDonation.email && <p><strong>Email:</strong> {currentDonation.email}</p>}
+              {currentDonation.phone && <p><strong>Phone:</strong> {currentDonation.phone}</p>}
+              {currentDonation.address && <p><strong>Address:</strong> {currentDonation.address}</p>}
+              {currentDonation.panNumber && <p><strong>PAN Number:</strong> {currentDonation.panNumber}</p>}
+              <p><strong>Category/Purpose:</strong> {currentDonation.purpose || currentDonation.category}</p>
+              <p><strong>Amount:</strong> {typeof currentDonation.amount === 'number' ? `₹${currentDonation.amount.toLocaleString()}` : currentDonation.amount}</p>
               <p><strong>Date:</strong> {currentDonation.date}</p>
               <p><strong>Status:</strong> <span className={`status-badge ${currentDonation.status.toLowerCase()}`}>{currentDonation.status}</span></p>
             </div>
@@ -126,6 +143,9 @@ function ManageDonations() {
             </div>
           </div>
         </div>
+      )}
+      {showReceipt && currentDonation && (
+        <Receipt booking={currentDonation} onClose={() => setShowReceipt(false)} />
       )}
     </div>
   );

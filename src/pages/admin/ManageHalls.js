@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
+import Receipt from '../../components/Receipt';
 import './AdminManage.css';
 
 function ManageHalls() {
-  const { marriageHalls, setMarriageHalls } = useData();
+  const { marriageHalls, setMarriageHalls, bookings } = useData();
   const [halls, setHalls] = useState([
     { id: 1, name: 'Kalyana Mandapa - Main Hall', capacity: '500 Guests', price: 25000, amenities: 'AC, Stage, Dining, Parking', bookings: 12 },
     { id: 2, name: 'Kalyana Mandapa - Mini Hall', capacity: '200 Guests', price: 15000, amenities: 'AC, Stage, Dining', bookings: 8 }
@@ -16,11 +17,18 @@ function ManageHalls() {
     name: '',
     capacity: '',
     price: '',
-    amenities: ''
+    amenities: '',
+    availableTime: '',
+    imageUrl: ''
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   const handleAdd = () => {
-    setFormData({ name: '', capacity: '', price: '', amenities: '' });
+    setFormData({ name: '', capacity: '', price: '', amenities: '', availableTime: '', imageUrl: '' });
     setShowAddModal(true);
   };
 
@@ -30,7 +38,9 @@ function ManageHalls() {
       name: hall.name,
       capacity: hall.capacity,
       price: hall.price,
-      amenities: hall.amenities
+      amenities: hall.amenities,
+      availableTime: hall.availableTime || '',
+      imageUrl: hall.imageUrl || hall.image || ''
     });
     setShowEditModal(true);
   };
@@ -48,9 +58,11 @@ function ManageHalls() {
     const newHall = {
       id: marriageHalls.length + 1,
       name: formData.name,
-      image: 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Hall',
+      image: formData.imageUrl || 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Hall',
+      imageUrl: formData.imageUrl,
       capacity: formData.capacity,
       amenities: formData.amenities,
+      availableTime: formData.availableTime,
       price: parseInt(formData.price),
       available: true,
       bookings: 0
@@ -65,13 +77,28 @@ function ManageHalls() {
     e.preventDefault();
     const updatedHalls = halls.map(hall => 
       hall.id === currentHall.id 
-        ? { ...hall, ...formData, price: parseInt(formData.price) }
+        ? { 
+            ...hall, 
+            ...formData, 
+            price: parseInt(formData.price),
+            image: formData.imageUrl || hall.image,
+            imageUrl: formData.imageUrl
+          }
         : hall
     );
     setHalls(updatedHalls);
     setMarriageHalls(marriageHalls.map(hall => 
       hall.id === currentHall.id 
-        ? { ...hall, name: formData.name, capacity: formData.capacity, amenities: formData.amenities, price: parseInt(formData.price) }
+        ? { 
+            ...hall, 
+            name: formData.name, 
+            capacity: formData.capacity, 
+            amenities: formData.amenities, 
+            availableTime: formData.availableTime,
+            price: parseInt(formData.price),
+            image: formData.imageUrl || hall.image,
+            imageUrl: formData.imageUrl
+          }
         : hall
     ));
     setShowEditModal(false);
@@ -85,6 +112,31 @@ function ManageHalls() {
     });
   };
 
+  // Filter marriage hall bookings
+  const hallBookings = bookings.filter(booking => booking.type === 'Marriage Hall');
+
+  const filteredBookings = hallBookings.filter(booking => {
+    const matchesSearch = booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         booking.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || booking.status.toLowerCase() === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleViewBooking = (booking) => {
+    setSelectedBooking(booking);
+    setShowBookingModal(true);
+  };
+
+  const handleGenerateReceipt = (booking) => {
+    setSelectedBooking(booking);
+    setShowReceipt(true);
+  };
+
+  const handleStatusChange = (bookingId, newStatus) => {
+    console.log(`Updating booking ${bookingId} to ${newStatus}`);
+    setShowBookingModal(false);
+  };
+
   return (
     <div className="admin-manage-page">
       <div className="admin-header">
@@ -95,9 +147,32 @@ function ManageHalls() {
       </div>
 
       <div className="manage-container">
+        <div className="stats-row">
+          <div className="stat-box">
+            <h3>Total Halls</h3>
+            <p className="stat-value">{halls.length}</p>
+          </div>
+          <div className="stat-box">
+            <h3>Total Bookings</h3>
+            <p className="stat-value">{hallBookings.length}</p>
+          </div>
+          <div className="stat-box">
+            <h3>Pending</h3>
+            <p className="stat-value">{hallBookings.filter(b => b.status === 'Pending').length}</p>
+          </div>
+          <div className="stat-box">
+            <h3>Confirmed</h3>
+            <p className="stat-value">{hallBookings.filter(b => b.status === 'Confirmed').length}</p>
+          </div>
+        </div>
+
+        <div className="management-section">
+          <h2>Marriage Halls</h2>
+          <button className="btn-add" onClick={handleAdd}>+ Add New Hall</button>
+        </div>
+
         <div className="manage-actions">
           <input type="text" placeholder="Search halls..." className="search-input" />
-          <button className="btn-add" onClick={handleAdd}>+ Add New Hall</button>
         </div>
 
         <div className="cards-grid">
@@ -111,6 +186,7 @@ function ManageHalls() {
                 <p><strong>Capacity:</strong> {hall.capacity}</p>
                 <p><strong>Price:</strong> ₹{hall.price.toLocaleString()}/-</p>
                 <p><strong>Amenities:</strong> {hall.amenities}</p>
+                {hall.availableTime && <p><strong>Available Time:</strong> {hall.availableTime}</p>}
                 <p><strong>Total Bookings:</strong> {hall.bookings}</p>
               </div>
               <div className="card-actions">
@@ -121,7 +197,144 @@ function ManageHalls() {
             </div>
           ))}
         </div>
+
+        <div className="management-section" style={{ marginTop: '3rem' }}>
+          <h2>Marriage Hall Bookings</h2>
+        </div>
+
+        <div className="manage-actions">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <select
+            className="filter-select"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Event Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBookings.length > 0 ? (
+                filteredBookings.map((booking, index) => (
+                  <tr key={index}>
+                    <td>#{index + 1}</td>
+                    <td>{booking.name}</td>
+                    <td>{booking.email}</td>
+                    <td>{booking.phone}</td>
+                    <td>{booking.date}</td>
+                    <td>{booking.amount}</td>
+                    <td>
+                      <span className={`status-badge ${booking.status.toLowerCase()}`}>
+                        {booking.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn-action btn-view"
+                        onClick={() => handleViewBooking(booking)}
+                      >
+                        View
+                      </button>
+                      <button 
+                        className="btn-action btn-edit"
+                        onClick={() => handleGenerateReceipt(booking)}
+                        style={{ marginLeft: '5px' }}
+                      >
+                        Receipt
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>
+                    No marriage hall bookings found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Booking Details Modal */}
+      {showBookingModal && selectedBooking && (
+        <div className="modal-overlay" onClick={() => setShowBookingModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Marriage Hall Booking Details</h2>
+            <div className="booking-details">
+              <p><strong>Booking ID:</strong> #{Math.random().toString(36).substring(2, 9).toUpperCase()}</p>
+              <p><strong>Customer Name:</strong> {selectedBooking.name}</p>
+              <p><strong>Email:</strong> {selectedBooking.email}</p>
+              <p><strong>Phone:</strong> {selectedBooking.phone}</p>
+              <p><strong>Hall Name:</strong> {selectedBooking.hallName || 'Kalyana Mandapa - Main Hall'}</p>
+              <p><strong>Hall Capacity:</strong> {selectedBooking.capacity || '500 Guests'}</p>
+              <p><strong>Event Date:</strong> {selectedBooking.date}</p>
+              <p><strong>Event Type:</strong> {selectedBooking.eventType || 'Marriage Ceremony'}</p>
+              <p><strong>Expected Guests:</strong> {selectedBooking.expectedGuests || selectedBooking.guests || '300-400'}</p>
+              <p><strong>Amenities:</strong> {selectedBooking.amenities || 'AC, Stage, Dining, Parking'}</p>
+              <p><strong>Amount:</strong> {selectedBooking.amount}</p>
+              <p><strong>Advance Paid:</strong> {selectedBooking.advancePaid || '₹5,000'}</p>
+              <p><strong>Balance:</strong> {selectedBooking.balance || 'Pending'}</p>
+              <p><strong>Status:</strong> <span className={`status-badge ${selectedBooking.status.toLowerCase()}`}>{selectedBooking.status}</span></p>
+              {selectedBooking.specialRequests && (
+                <p><strong>Special Requirements:</strong> {selectedBooking.specialRequests}</p>
+              )}
+            </div>
+
+            <div className="status-buttons">
+              <button 
+                className="btn-action btn-view"
+                onClick={() => handleStatusChange(selectedBooking.id, 'Confirmed')}
+              >
+                Confirm Booking
+              </button>
+              <button 
+                className="btn-action btn-edit"
+                onClick={() => handleStatusChange(selectedBooking.id, 'Completed')}
+              >
+                Mark Completed
+              </button>
+              <button 
+                className="btn-action btn-delete"
+                onClick={() => handleStatusChange(selectedBooking.id, 'Cancelled')}
+              >
+                Cancel Booking
+              </button>
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-action" onClick={() => setShowBookingModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (
@@ -160,6 +373,20 @@ function ManageHalls() {
                 value={formData.amenities}
                 onChange={handleChange}
                 required 
+              />
+              <input 
+                type="text" 
+                name="availableTime"
+                placeholder="Available Time (e.g., 9:00 AM - 11:00 PM)" 
+                value={formData.availableTime}
+                onChange={handleChange}
+              />
+              <input 
+                type="url" 
+                name="imageUrl"
+                placeholder="Image URL (optional)" 
+                value={formData.imageUrl}
+                onChange={handleChange}
               />
               <div className="modal-actions">
                 <button type="submit" className="btn-action btn-view">Add Hall</button>
@@ -208,6 +435,20 @@ function ManageHalls() {
                 onChange={handleChange}
                 required 
               />
+              <input 
+                type="text" 
+                name="availableTime"
+                placeholder="Available Time (e.g., 9:00 AM - 11:00 PM)" 
+                value={formData.availableTime}
+                onChange={handleChange}
+              />
+              <input 
+                type="url" 
+                name="imageUrl"
+                placeholder="Image URL (optional)" 
+                value={formData.imageUrl}
+                onChange={handleChange}
+              />
               <div className="modal-actions">
                 <button type="submit" className="btn-action btn-view">Update Hall</button>
                 <button type="button" className="btn-action btn-delete" onClick={() => setShowEditModal(false)}>Cancel</button>
@@ -215,6 +456,9 @@ function ManageHalls() {
             </form>
           </div>
         </div>
+      )}
+      {showReceipt && selectedBooking && (
+        <Receipt booking={selectedBooking} onClose={() => setShowReceipt(false)} />
       )}
     </div>
   );

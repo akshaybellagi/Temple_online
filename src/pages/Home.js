@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { GiTempleGate, GiPrayer } from 'react-icons/gi';
 import { FaHome, FaDonate, FaChurch, FaBuilding, FaTv, FaNewspaper, FaBook, FaLaptop, FaUsers, FaStar, FaCalendarAlt } from 'react-icons/fa';
@@ -8,6 +9,7 @@ import { IoLibrary } from 'react-icons/io5';
 import { BiMusic } from 'react-icons/bi';
 
 function Home() {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [statsVisible, setStatsVisible] = useState(false);
 
@@ -65,7 +67,7 @@ function Home() {
                 <div className="hero-icon"><slide.icon /></div>
                 <h1 className="hero-title">{slide.title}</h1>
                 <p className="hero-subtitle">{slide.subtitle}</p>
-                <a href="/booking" className="hero-cta">Book Now</a>
+                <button onClick={() => navigate('/booking')} className="hero-cta">Book Now</button>
               </div>
             </div>
           ))}
@@ -124,18 +126,18 @@ function Home() {
           <h2 className="section-heading">ONLINE BOOKING SERVICES</h2>
           
           <div className="service-grid">
-            <a href="/booking" className="service-btn">
+            <button onClick={() => navigate('/booking?type=rooms')} className="service-btn">
               <span className="icon"><FaHome /></span>
               <span>ROOM BOOKING</span>
-            </a>
+            </button>
             <a href="/services" className="service-btn">
               <span className="icon"><FaDonate /></span>
               <span>E-HUNDI</span>
             </a>
-            <a href="/booking" className="service-btn">
+            <button onClick={() => navigate('/booking?type=marriage')} className="service-btn">
               <span className="icon"><FaChurch /></span>
               <span>MARRIAGE HALL</span>
-            </a>
+            </button>
           </div>
         </div>
       </section>

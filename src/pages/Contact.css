@@ -125,3 +125,66 @@
     font-size: 0.9rem;
   }
 }
+
+/* Additional Mobile Responsive Improvements */
+@media (max-width: 360px) {
+  .contact-header-section {
+    padding: 30px 10px 20px;
+  }
+
+  .info-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .info-item h3 {
+    font-size: 1rem;
+  }
+
+  .info-item p {
+    font-size: 0.9rem;
+  }
+
+  .contact-form-container {
+    padding: 1rem;
+  }
+
+  .contact-form-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .contact-form {
+    gap: 1.2rem;
+  }
+
+  .map-placeholder {
+    height: 220px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .contact-form input,
+  .contact-form textarea,
+  .contact-form button {
+    min-height: 48px;
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Improve form usability on mobile */
+@media (max-width: 768px) {
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: 2px solid #dc143c;
+    outline-offset: 2px;
+  }
+
+  .info-item p {
+    word-break: break-word;
+  }
+}

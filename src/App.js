@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -19,6 +19,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageBookings from './pages/admin/ManageBookings';
 import ManageRooms from './pages/admin/ManageRooms';
 import ManageHalls from './pages/admin/ManageHalls';
+import ManageSevas from './pages/admin/ManageSevas';
 import ManageDonations from './pages/admin/ManageDonations';
 import ManageGallery from './pages/admin/ManageGallery';
 import ManageContent from './pages/admin/ManageContent';
@@ -33,11 +34,13 @@ function App() {
         <div className="App">
         <Routes>
           {/* Admin Routes */}
+          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/bookings" element={<ManageBookings />} />
           <Route path="/admin/rooms" element={<ManageRooms />} />
           <Route path="/admin/halls" element={<ManageHalls />} />
+          <Route path="/admin/sevas" element={<ManageSevas />} />
           <Route path="/admin/donations" element={<ManageDonations />} />
           <Route path="/admin/gallery" element={<ManageGallery />} />
           <Route path="/admin/content" element={<ManageContent />} />

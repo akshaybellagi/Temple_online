@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
+import { useSearchParams } from 'react-router-dom';
 import { FaHome, FaDonate, FaChurch, FaBuilding, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
 import { GiTempleGate, GiOilDrum, GiWaterDrop, GiFireBowl, GiCarousel } from 'react-icons/gi';
 import { GiPrayer } from 'react-icons/gi';
 import { FaAppleAlt } from 'react-icons/fa';
 import { GiFootprint } from 'react-icons/gi';
 import { FaGlassMartini } from 'react-icons/fa';
+import Receipt from '../components/Receipt';
 import './Booking.css';
 
 function Booking() {
   const { rooms, marriageHalls, addBooking } = useData();
+  const [searchParams] = useSearchParams();
   const [bookingType, setBookingType] = useState('rooms');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedSeva, setSelectedSeva] = useState(null);
   const [bookingStep, setBookingStep] = useState('service-selection'); // service-selection, calendar, availability, form, confirmation, seva-selection
-  const [selectedMonth, setSelectedMonth] = useState(11); // December (0-indexed)
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [confirmedBooking, setConfirmedBooking] = useState(null);
+  
+  // Initialize with today's date
+  const today = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth()); // Current month (0-indexed)
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear()); // Current year
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,6 +33,19 @@ function Booking() {
     guests: '2',
     specialRequests: ''
   });
+
+  // Check URL parameters on component mount
+  useEffect(() => {
+    const type = searchParams.get('type');
+    if (type === 'rooms' || type === 'marriage' || type === 'seva') {
+      setBookingType(type);
+      if (type === 'seva') {
+        setBookingStep('seva-selection');
+      } else {
+        setBookingStep('calendar');
+      }
+    }
+  }, [searchParams]);
 
   const sevaList = [
     { 
@@ -124,9 +146,19 @@ function Booking() {
   const generateCalendarDates = () => {
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
     const dates = [];
+    const today = new Date();
+    const todayDate = today.getDate();
+    const todayMonth = today.getMonth();
+    const todayYear = today.getFullYear();
     
     for (let i = 1; i <= daysInMonth; i++) {
       const dateObj = new Date(selectedYear, selectedMonth, i);
+      
+      // Skip past dates (only show today and future dates)
+      if (selectedYear === todayYear && selectedMonth === todayMonth && i < todayDate) {
+        continue;
+      }
+      
       const dayName = dayNames[dateObj.getDay()];
       const tithiIndex = (i - 1) % tithiNames.length;
       
@@ -167,21 +199,53 @@ function Booking() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    
+    // Ensure selectedDate exists and has all required properties
+    if (!selectedDate || !selectedDate.date || !selectedDate.month || !selectedDate.year) {
+      alert('Please select a valid date');
+      return;
+    }
+    
+    // Format date consistently to avoid timezone issues
+    const monthIndex = monthNames.indexOf(selectedDate.month);
+    const formattedDate = `${selectedDate.date.toString().padStart(2, '0')}/${(monthIndex + 1).toString().padStart(2, '0')}/${selectedDate.year}`;
+    
     // Add booking to global state
     const bookingData = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
+      guests: formData.guests,
+      specialRequests: formData.specialRequests,
       type: bookingType === 'rooms' ? 'Room' : bookingType === 'seva' ? 'Seva' : 'Marriage Hall',
-      date: `${selectedDate.month} ${selectedDate.date}, ${selectedDate.year}`,
+      date: formattedDate, // Use DD/MM/YYYY format
       status: 'Pending',
       amount: bookingType === 'rooms' 
         ? `₹${selectedRoom.type?.price || selectedRoom.price}` 
         : bookingType === 'seva'
         ? `₹${selectedSeva.price}`
-        : `₹${selectedRoom.price.toLocaleString()}`
+        : `₹${selectedRoom.price.toLocaleString()}`,
+      // Add specific details based on booking type
+      ...(bookingType === 'rooms' && {
+        roomName: selectedRoom.name,
+        roomType: selectedRoom.type?.name || 'Standard',
+        roomNumber: Math.floor(Math.random() * 100) + 101
+      }),
+      ...(bookingType === 'seva' && {
+        sevaName: selectedSeva.name,
+        sevaType: selectedSeva.name,
+        sevaTime: selectedSeva.time
+      }),
+      ...(bookingType === 'marriage' && {
+        hallName: selectedRoom.name,
+        capacity: selectedRoom.capacity,
+        eventType: 'Marriage Ceremony',
+        amenities: selectedRoom.amenities
+      })
     };
+    
     addBooking(bookingData);
+    setConfirmedBooking(bookingData);
     setBookingStep('confirmation');
   };
 
@@ -219,7 +283,13 @@ function Booking() {
     setBookingType('rooms');
     setSelectedDate(null);
     setSelectedRoom(null);
+    setSelectedSeva(null);
+    setConfirmedBooking(null);
     setBookingStep('service-selection');
+  };
+
+  const handleViewReceipt = () => {
+    setShowReceipt(true);
   };
 
   return (
@@ -258,7 +328,7 @@ function Booking() {
                 <h3>MARRIAGE HALL</h3>
               </div>
               <a 
-                href="/services"
+                href="/rooms-donor"
                 className="service-selection-card"
               >
                 <div className="service-icon"><FaBuilding /></div>
@@ -351,13 +421,13 @@ function Booking() {
           <div className="container">
             <div className="selected-date-header">
               <h2 className="availability-title">
-                Available Rooms for {selectedDate.month} {selectedDate.date}, {selectedDate.year}
+                Available Rooms for {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}
               </h2>
               <button className="btn-change-date" onClick={handleBackToCalendar}>
                 Change Date
               </button>
             </div>
-            {rooms.map(room => (
+            {rooms && rooms.length > 0 ? rooms.map(room => (
             <div key={room.id} className="room-card">
               <div className="room-image">
                 <img src={room.image} alt={room.name} />
@@ -371,13 +441,13 @@ function Booking() {
                 </h2>
                 
                 <div className="room-types">
-                  {room.types.map((type, index) => (
+                  {room.types && Array.isArray(room.types) ? room.types.map((type, index) => (
                     <div key={index} className="room-type-card">
                       <p className="room-type-name">{type.name}</p>
                       <p className="room-price">₹ {type.price}/-</p>
                       <div className="room-availability">
-                        <span>{type.available} of {type.total}</span>
-                        <span className="rooms-full-badge">ROOMS FULL</span>
+                        <span>{type.available} of {type.total} Available</span>
+                        {type.available === 0 && <span className="rooms-full-badge">ROOMS FULL</span>}
                       </div>
                       <button 
                         className="btn book-room-btn" 
@@ -387,11 +457,15 @@ function Booking() {
                         Book Now
                       </button>
                     </div>
-                  ))}
+                  )) : (
+                    <p>No room types available</p>
+                  )}
                 </div>
               </div>
             </div>
-          ))}
+          )) : (
+            <p>No rooms available</p>
+          )}
           </div>
         </section>
       )}
@@ -401,7 +475,7 @@ function Booking() {
           <div className="container">
             <div className="selected-date-header">
               <h2 className="availability-title">
-                Confirm Seva Booking for {selectedDate.month} {selectedDate.date}, {selectedDate.year}
+                Confirm Seva Booking for {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}
               </h2>
               <button className="btn-change-date" onClick={handleBackToCalendar}>
                 Change Date
@@ -429,7 +503,7 @@ function Booking() {
           <div className="container">
             <div className="selected-date-header">
               <h2 className="availability-title">
-                Available Marriage Halls for {selectedDate.month} {selectedDate.date}, {selectedDate.year}
+                Available Marriage Halls for {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}
               </h2>
               <button className="btn-change-date" onClick={handleBackToCalendar}>
                 Change Date
@@ -482,7 +556,7 @@ function Booking() {
 
               <div className="booking-summary">
                 <h3>Booking Summary</h3>
-                <p><strong>Date:</strong> {selectedDate.month} {selectedDate.date}, {selectedDate.year}</p>
+                <p><strong>Date:</strong> {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}</p>
                 {bookingType === 'seva' ? (
                   <>
                     <p><strong>Seva:</strong> {selectedSeva.name}</p>
@@ -590,7 +664,7 @@ function Booking() {
               <div className="confirmation-details">
                 <h3>Booking Details</h3>
                 <p><strong>Name:</strong> {formData.name}</p>
-                <p><strong>Date:</strong> {selectedDate.month} {selectedDate.date}, {selectedDate.year}</p>
+                <p><strong>Date:</strong> {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}</p>
                 {bookingType === 'seva' ? (
                   <>
                     <p><strong>Seva:</strong> {selectedSeva.name}</p>
@@ -605,12 +679,21 @@ function Booking() {
                 <p><strong>Booking ID:</strong> #{Math.random().toString(36).substring(2, 9).toUpperCase()}</p>
               </div>
 
-              <button className="btn" onClick={handleBackToServices}>
-                Make Another Booking
-              </button>
+              <div className="confirmation-actions">
+                <button className="btn btn-receipt" onClick={handleViewReceipt}>
+                  Download Receipt
+                </button>
+                <button className="btn btn-secondary" onClick={handleBackToServices}>
+                  Make Another Booking
+                </button>
+              </div>
             </div>
           </div>
         </section>
+      )}
+
+      {showReceipt && confirmedBooking && (
+        <Receipt booking={confirmedBooking} onClose={() => setShowReceipt(false)} />
       )}
     </div>
   );

@@ -15,11 +15,11 @@ export const DataProvider = ({ children }) => {
   const [rooms, setRooms] = useState(() => {
     const saved = localStorage.getItem('rooms');
     return saved ? JSON.parse(saved) : [
-      { id: 1, name: 'DHEERENDRA VASATHI GRUHA', image: 'https://via.placeholder.com/300x200/4a90e2/ffffff?text=Dheerendra+Vasathi', lift: true, types: [
+      { id: 1, name: 'DHEERENDRA VASATHI GRUHA', image: 'https://via.placeholder.com/300x200/4a90e2/ffffff?text=Room', lift: true, types: [
         { name: 'NON-AC | 2-Occupancy | First Floor | Western Commode', price: 600, available: 0, total: 25 },
         { name: 'NON-AC | 2-Occupancy | Second Floor | Western Commode', price: 600, available: 0, total: 20 }
       ]},
-      { id: 2, name: 'PANCHAMUKI DARSHAN', image: 'https://via.placeholder.com/300x200/5cb85c/ffffff?text=Panchamuki+Darshan', lift: false, types: [
+      { id: 2, name: 'PANCHAMUKI DARSHAN', image: 'https://via.placeholder.com/300x200/5cb85c/ffffff?text=Room', lift: false, types: [
         { name: 'NON-AC | 2-Occupancy | First Floor | Western Commode', price: 250, available: 0, total: 10 },
         { name: 'NON-AC | 2-Occupancy | Ground Floor | Indian Commode', price: 250, available: 0, total: 10 }
       ]}
@@ -100,8 +100,7 @@ export const DataProvider = ({ children }) => {
   const addBooking = (booking) => {
     const newBooking = {
       id: bookings.length + 1,
-      ...booking,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      ...booking
     };
     setBookings([...bookings, newBooking]);
     return newBooking;
