@@ -6,12 +6,6 @@ import './AdminManage.css';
 
 function ManageDonations() {
   const { donations, deleteDonation } = useData();
-  const [localDonations, setLocalDonations] = useState([]);
-  
-  // Sync with Supabase donations
-  React.useEffect(() => {
-    setLocalDonations(donations);
-  }, [donations]);
   
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);

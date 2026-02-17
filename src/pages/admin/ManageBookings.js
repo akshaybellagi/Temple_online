@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import './AdminManage.css';
 
 function ManageBookings() {
-  const { bookings, setBookings } = useData();
+  const { bookings } = useData();
   const [localBookings, setLocalBookings] = useState([]);
   
   // Sync with Supabase bookings

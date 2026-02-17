@@ -69,8 +69,6 @@ function ManageGallery() {
     });
   };
 
-
-
   return (
     <div className="admin-manage-page">
       <div className="admin-header">
