@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 
 const DataContext = createContext();
 
@@ -11,111 +12,491 @@ export const useData = () => {
 };
 
 export const DataProvider = ({ children }) => {
-  // Initialize from localStorage or use defaults
-  const [rooms, setRooms] = useState(() => {
-    const saved = localStorage.getItem('rooms');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: 'DHEERENDRA VASATHI GRUHA', image: 'https://via.placeholder.com/300x200/4a90e2/ffffff?text=Room', lift: true, types: [
-        { name: 'NON-AC | 2-Occupancy | First Floor | Western Commode', price: 600, available: 0, total: 25 },
-        { name: 'NON-AC | 2-Occupancy | Second Floor | Western Commode', price: 600, available: 0, total: 20 }
-      ]},
-      { id: 2, name: 'PANCHAMUKI DARSHAN', image: 'https://via.placeholder.com/300x200/5cb85c/ffffff?text=Room', lift: false, types: [
-        { name: 'NON-AC | 2-Occupancy | First Floor | Western Commode', price: 250, available: 0, total: 10 },
-        { name: 'NON-AC | 2-Occupancy | Ground Floor | Indian Commode', price: 250, available: 0, total: 10 }
-      ]}
-    ];
+  const [rooms, setRooms] = useState([]);
+  const [marriageHalls, setMarriageHalls] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [donations, setDonations] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [temples, setTemples] = useState([]);
+  const [siteContent, setSiteContent] = useState({
+    about: '',
+    services: '',
+    contact: ''
   });
+  const [loading, setLoading] = useState(true);
 
-  const [marriageHalls, setMarriageHalls] = useState(() => {
-    const saved = localStorage.getItem('marriageHalls');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: 'KALYANA MANDAPA - MAIN HALL', image: 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Main+Hall', capacity: '500 Guests', amenities: 'AC | Stage | Dining Area | Parking', price: 25000, available: true },
-      { id: 2, name: 'KALYANA MANDAPA - MINI HALL', image: 'https://via.placeholder.com/300x200/f39c12/ffffff?text=Mini+Hall', capacity: '200 Guests', amenities: 'AC | Stage | Dining Area', price: 15000, available: true }
-    ];
-  });
+  // Fetch rooms
+  const fetchRooms = async () => {
+    try {
+      const { data: roomsData, error: roomsError } = await supabase
+        .from('rooms')
+        .select('*')
+        .order('name', { ascending: true })
+        .order('id', { ascending: true });
 
-  const [bookings, setBookings] = useState(() => {
-    const saved = localStorage.getItem('bookings');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: 'John Doe', type: 'Room', date: 'Dec 15, 2025', status: 'Confirmed', amount: '₹600', email: 'john@example.com', phone: '+91 9876543210' },
-      { id: 2, name: 'Jane Smith', type: 'Marriage Hall', date: 'Dec 20, 2025', status: 'Pending', amount: '₹25,000', email: 'jane@example.com', phone: '+91 9876543211' }
-    ];
-  });
+      if (roomsError) throw roomsError;
 
-  const [donations, setDonations] = useState(() => {
-    const saved = localStorage.getItem('donations');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, donor: 'Rajesh Kumar', category: 'Annadhana', amount: 5000, date: 'Dec 10, 2025', status: 'Completed' },
-      { id: 2, donor: 'Priya Sharma', category: 'Goshala', amount: 10000, date: 'Dec 12, 2025', status: 'Completed' }
-    ];
-  });
+      // Group rooms by name and create types array
+      const roomsMap = {};
+      
+      roomsData.forEach(room => {
+        if (!roomsMap[room.name]) {
+          roomsMap[room.name] = {
+            id: room.id,
+            name: room.name,
+            image: room.image || 'https://via.placeholder.com/300x200/3498db/ffffff?text=Room',
+            lift: room.lift,
+            types: []
+          };
+        }
+        
+        // Add this room as a type
+        roomsMap[room.name].types.push({
+          id: room.id,
+          name: room.type,
+          price: room.price,
+          available: room.available || 0,
+          total: room.total || 0,
+          floor: room.floor,
+          occupancy: room.occupancy,
+          commode_type: room.commode_type,
+          ac: room.ac
+        });
+      });
 
-  const [galleryImages, setGalleryImages] = useState(() => {
-    const saved = localStorage.getItem('galleryImages');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, title: 'Main Temple', category: 'temple', url: 'https://via.placeholder.com/300x200' },
-      { id: 2, title: 'Festival Celebration', category: 'events', url: 'https://via.placeholder.com/300x200' },
-      { id: 3, title: 'Prayer Hall', category: 'temple', url: 'https://via.placeholder.com/300x200' },
-      { id: 4, title: 'Annual Event', category: 'events', url: 'https://via.placeholder.com/300x200' },
-      { id: 5, title: 'Guest Rooms', category: 'facilities', url: 'https://via.placeholder.com/300x200' },
-      { id: 6, title: 'Dining Hall', category: 'facilities', url: 'https://via.placeholder.com/300x200' }
-    ];
-  });
+      const roomsWithTypes = Object.values(roomsMap);
+      setRooms(roomsWithTypes);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      // Set empty array on error so UI doesn't break
+      setRooms([]);
+    }
+  };
 
-  const [siteContent, setSiteContent] = useState(() => {
-    const saved = localStorage.getItem('siteContent');
-    return saved ? JSON.parse(saved) : {
-      about: 'Our matha has a rich spiritual heritage spanning many generations...',
-      services: 'We offer various spiritual services including daily pooja, special sevas...',
-      contact: 'Email: info@srsmatha.org\nPhone: +91 XXXXXXXXXX'
+  // Fetch marriage halls
+  const fetchMarriageHalls = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('marriage_halls')
+        .select('*')
+        .order('id');
+
+      if (error) throw error;
+      setMarriageHalls(data);
+    } catch (error) {
+      console.error('Error fetching marriage halls:', error);
+    }
+  };
+
+  // Fetch bookings
+  const fetchBookings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBookings(data);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    }
+  };
+
+  // Fetch donations
+  const fetchDonations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('donations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDonations(data);
+    } catch (error) {
+      console.error('Error fetching donations:', error);
+    }
+  };
+
+  // Fetch gallery images
+  const fetchGalleryImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .select('*')
+        .order('id');
+
+      if (error) throw error;
+      setGalleryImages(data);
+    } catch (error) {
+      console.error('Error fetching gallery images:', error);
+    }
+  };
+
+  // Fetch site content
+  const fetchSiteContent = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('*');
+
+      if (error) throw error;
+
+      const contentObj = {};
+      data.forEach(item => {
+        contentObj[item.key] = item.value;
+      });
+      setSiteContent(contentObj);
+    } catch (error) {
+      console.error('Error fetching site content:', error);
+    }
+  };
+
+  // Fetch temples
+  const fetchTemples = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('temples')
+        .select('*')
+        .order('id');
+
+      if (error) throw error;
+      setTemples(data || []);
+    } catch (error) {
+      console.error('Error fetching temples:', error);
+      setTemples([]);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchRooms(),
+        fetchMarriageHalls(),
+        fetchBookings(),
+        fetchDonations(),
+        fetchGalleryImages(),
+        fetchSiteContent(),
+        fetchTemples()
+      ]);
+      setLoading(false);
     };
-  });
 
-  // Save to localStorage whenever data changes
-  useEffect(() => {
-    localStorage.setItem('rooms', JSON.stringify(rooms));
-  }, [rooms]);
-
-  useEffect(() => {
-    localStorage.setItem('marriageHalls', JSON.stringify(marriageHalls));
-  }, [marriageHalls]);
-
-  useEffect(() => {
-    localStorage.setItem('bookings', JSON.stringify(bookings));
-  }, [bookings]);
-
-  useEffect(() => {
-    localStorage.setItem('donations', JSON.stringify(donations));
-  }, [donations]);
-
-  useEffect(() => {
-    localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-  }, [galleryImages]);
-
-  useEffect(() => {
-    localStorage.setItem('siteContent', JSON.stringify(siteContent));
-  }, [siteContent]);
+    fetchAllData();
+  }, []);
 
   // Add booking function
-  const addBooking = (booking) => {
-    const newBooking = {
-      id: bookings.length + 1,
-      ...booking
-    };
-    setBookings([...bookings, newBooking]);
-    return newBooking;
+  const addBooking = async (booking) => {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert([booking])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setBookings([data, ...bookings]);
+      return data;
+    } catch (error) {
+      console.error('Error adding booking:', error);
+      throw error;
+    }
+  };
+
+  // Update booking function
+  const updateBooking = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setBookings(bookings.map(b => b.id === id ? data : b));
+      return data;
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      throw error;
+    }
+  };
+
+  // Delete booking function
+  const deleteBooking = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setBookings(bookings.filter(b => b.id !== id));
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      throw error;
+    }
   };
 
   // Add donation function
-  const addDonation = (donation) => {
-    const newDonation = {
-      id: donations.length + 1,
-      ...donation,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      status: 'Completed'
-    };
-    setDonations([...donations, newDonation]);
-    return newDonation;
+  const addDonation = async (donation) => {
+    try {
+      // Transform the donation data to match database schema
+      const donationData = {
+        donor: donation.name,
+        category: donation.purpose,
+        amount: parseInt(donation.amount.replace(/[₹,]/g, '').trim()) || 0,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        status: 'Completed'
+      };
+
+      const { data, error } = await supabase
+        .from('donations')
+        .insert([donationData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDonations([data, ...donations]);
+      return data;
+    } catch (error) {
+      console.error('Error adding donation:', error);
+      throw error;
+    }
+  };
+
+  // Update donation function
+  const updateDonation = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('donations')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDonations(donations.map(d => d.id === id ? data : d));
+      return data;
+    } catch (error) {
+      console.error('Error updating donation:', error);
+      throw error;
+    }
+  };
+
+  // Delete donation function
+  const deleteDonation = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('donations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setDonations(donations.filter(d => d.id !== id));
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      throw error;
+    }
+  };
+
+  // Update room function
+  const updateRoom = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('rooms')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await fetchRooms(); // Refresh rooms data
+      return data;
+    } catch (error) {
+      console.error('Error updating room:', error);
+      throw error;
+    }
+  };
+
+  // Update room type function (now updates the room directly)
+  const updateRoomType = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('rooms')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await fetchRooms(); // Refresh rooms data
+      return data;
+    } catch (error) {
+      console.error('Error updating room type:', error);
+      throw error;
+    }
+  };
+
+  // Update marriage hall function
+  const updateMarriageHall = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('marriage_halls')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setMarriageHalls(marriageHalls.map(h => h.id === id ? data : h));
+      return data;
+    } catch (error) {
+      console.error('Error updating marriage hall:', error);
+      throw error;
+    }
+  };
+
+  // Add gallery image function
+  const addGalleryImage = async (image) => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .insert([image])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setGalleryImages([...galleryImages, data]);
+      return data;
+    } catch (error) {
+      console.error('Error adding gallery image:', error);
+      throw error;
+    }
+  };
+
+  // Update gallery image function
+  const updateGalleryImage = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setGalleryImages(galleryImages.map(img => img.id === id ? data : img));
+      return data;
+    } catch (error) {
+      console.error('Error updating gallery image:', error);
+      throw error;
+    }
+  };
+
+  // Delete gallery image function
+  const deleteGalleryImage = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('gallery_images')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setGalleryImages(galleryImages.filter(img => img.id !== id));
+    } catch (error) {
+      console.error('Error deleting gallery image:', error);
+      throw error;
+    }
+  };
+
+  // Update site content function
+  const updateSiteContent = async (key, value) => {
+    try {
+      const { data, error } = await supabase
+        .from('site_content')
+        .upsert({ key, value })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSiteContent({ ...siteContent, [key]: value });
+      return data;
+    } catch (error) {
+      console.error('Error updating site content:', error);
+      throw error;
+    }
+  };
+
+  // Add temple function
+  const addTemple = async (temple) => {
+    try {
+      const { data, error } = await supabase
+        .from('temples')
+        .insert([temple])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTemples([...temples, data]);
+      return data;
+    } catch (error) {
+      console.error('Error adding temple:', error);
+      throw error;
+    }
+  };
+
+  // Update temple function
+  const updateTemple = async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('temples')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTemples(temples.map(t => t.id === id ? data : t));
+      return data;
+    } catch (error) {
+      console.error('Error updating temple:', error);
+      throw error;
+    }
+  };
+
+  // Delete temple function
+  const deleteTemple = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('temples')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setTemples(temples.filter(t => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting temple:', error);
+      throw error;
+    }
   };
 
   const value = {
@@ -126,13 +507,41 @@ export const DataProvider = ({ children }) => {
     bookings,
     setBookings,
     addBooking,
+    updateBooking,
+    deleteBooking,
     donations,
     setDonations,
     addDonation,
+    updateDonation,
+    deleteDonation,
     galleryImages,
     setGalleryImages,
+    addGalleryImage,
+    updateGalleryImage,
+    deleteGalleryImage,
+    temples,
+    setTemples,
+    addTemple,
+    updateTemple,
+    deleteTemple,
     siteContent,
-    setSiteContent
+    setSiteContent,
+    updateSiteContent,
+    updateRoom,
+    updateRoomType,
+    updateMarriageHall,
+    loading,
+    refreshData: async () => {
+      await Promise.all([
+        fetchRooms(),
+        fetchMarriageHalls(),
+        fetchBookings(),
+        fetchDonations(),
+        fetchGalleryImages(),
+        fetchSiteContent(),
+        fetchTemples()
+      ]);
+    }
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

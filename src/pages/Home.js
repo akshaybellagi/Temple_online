@@ -12,6 +12,8 @@ function Home() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [statsVisible, setStatsVisible] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedAudio, setSelectedAudio] = useState(null);
 
   const heroSlides = [
     {
@@ -30,6 +32,114 @@ function Home() {
       icon: GiPrayer
     }
   ];
+
+  const projectsData = {
+    goshala: {
+      title: "GOSHALA",
+      icon: GiCow,
+      description: "Our Goshala is dedicated to the protection and care of sacred cows. We provide shelter, food, and medical care to abandoned and injured cattle.",
+      features: [
+        "Shelter for 100+ cows",
+        "24/7 veterinary care",
+        "Organic farming with cow products",
+        "Educational programs on cow protection"
+      ],
+      stats: {
+        cows: "100+",
+        area: "5 acres",
+        volunteers: "50+"
+      }
+    },
+    vidyapeetha: {
+      title: "VIDYAPEETHA",
+      icon: IoLibrary,
+      description: "Our Vidyapeetha is a center for traditional Vedic education and spiritual learning. We offer courses in Sanskrit, philosophy, and ancient scriptures.",
+      features: [
+        "Traditional Vedic education",
+        "Sanskrit language courses",
+        "Philosophy and scripture studies",
+        "Residential programs for students"
+      ],
+      stats: {
+        students: "200+",
+        courses: "15+",
+        teachers: "25+"
+      }
+    },
+    museum: {
+      title: "DASASAHITYA MUSEUM",
+      icon: GiMusicalNotes,
+      description: "A unique museum dedicated to preserving and showcasing the rich heritage of Dasa literature and devotional music traditions.",
+      features: [
+        "Rare manuscripts collection",
+        "Audio archives of devotional songs",
+        "Interactive exhibits",
+        "Regular cultural programs"
+      ],
+      stats: {
+        artifacts: "500+",
+        recordings: "1000+",
+        visitors: "10,000+"
+      }
+    }
+  };
+
+  const audioData = {
+    stotras: {
+      title: "STOTRAS",
+      icon: GiMusicalNotes,
+      description: "Sacred hymns and verses praising deities. Stotras are powerful devotional compositions that invoke divine blessings and spiritual energy.",
+      tracks: [
+        "Vishnu Sahasranama",
+        "Lalitha Sahasranama",
+        "Shiva Stotram",
+        "Hanuman Chalisa",
+        "Durga Stotram",
+        "Ganesha Stotram"
+      ],
+      stats: {
+        tracks: "50+",
+        duration: "10 hrs",
+        languages: "5+"
+      }
+    },
+    bhajans: {
+      title: "BHAJANS",
+      icon: BiMusic,
+      description: "Devotional songs expressing love and devotion to God. Bhajans create a spiritual atmosphere and connect devotees with the divine.",
+      tracks: [
+        "Krishna Bhajans",
+        "Rama Bhajans",
+        "Sai Baba Bhajans",
+        "Devi Bhajans",
+        "Shiva Bhajans",
+        "Ganesh Bhajans"
+      ],
+      stats: {
+        tracks: "100+",
+        duration: "20 hrs",
+        artists: "25+"
+      }
+    },
+    mantras: {
+      title: "MANTRAS",
+      icon: GiTempleGate,
+      description: "Sacred sound vibrations with spiritual power. Mantras are ancient Vedic chants that purify the mind and elevate consciousness.",
+      tracks: [
+        "Gayatri Mantra",
+        "Maha Mrityunjaya Mantra",
+        "Om Namah Shivaya",
+        "Hare Krishna Mantra",
+        "Lakshmi Mantra",
+        "Saraswati Mantra"
+      ],
+      stats: {
+        tracks: "75+",
+        duration: "15 hrs",
+        traditions: "10+"
+      }
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -148,25 +258,13 @@ function Home() {
           <h2 className="section-heading">OTHER SERVICES</h2>
           
           <div className="service-grid">
-            <a href="/rooms-donor" className="service-btn">
-              <span className="icon"><FaBuilding /></span>
-              <span>ROOMS DONOR</span>
-            </a>
             <a href="/live-status" className="service-btn">
               <span className="icon"><FaTv /></span>
               <span>LIVE STATUS</span>
             </a>
-            <a href="/latest-news" className="service-btn">
-              <span className="icon"><FaNewspaper /></span>
-              <span>LATEST NEWS</span>
-            </a>
             <a href="/panchanga" className="service-btn">
               <span className="icon"><MdRestaurant /></span>
               <span>PANCHANGA</span>
-            </a>
-            <a href="/my-history" className="service-btn">
-              <span className="icon"><FaBook /></span>
-              <span>MY HISTORY</span>
             </a>
             <a href="/contact" className="service-btn">
               <span className="icon"><FaLaptop /></span>
@@ -181,21 +279,61 @@ function Home() {
         <div className="container">
           <h2 className="section-heading">PROJECTS</h2>
           <div className="projects-grid">
-            <button className="project-btn">
+            <button className="project-btn" onClick={() => setSelectedProject('goshala')}>
               <span className="icon"><GiCow /></span>
               <span>GOSHALA</span>
             </button>
-            <button className="project-btn">
+            <button className="project-btn" onClick={() => setSelectedProject('vidyapeetha')}>
               <span className="icon"><IoLibrary /></span>
               <span>VIDYAPEETHA</span>
             </button>
-            <button className="project-btn">
+            <button className="project-btn" onClick={() => setSelectedProject('museum')}>
               <span className="icon"><GiMusicalNotes /></span>
               <span>DASASAHITYA MUSEUM</span>
             </button>
           </div>
         </div>
       </section>
+
+      {/* Project Modal */}
+      {selectedProject && (
+        <div className="project-modal-overlay" onClick={() => setSelectedProject(null)}>
+          <div className="project-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedProject(null)}>×</button>
+            <div className="modal-header">
+              <div className="modal-icon">
+                {React.createElement(projectsData[selectedProject].icon)}
+              </div>
+              <h2>{projectsData[selectedProject].title}</h2>
+            </div>
+            <div className="modal-body">
+              <p className="modal-description">{projectsData[selectedProject].description}</p>
+              
+              <div className="modal-stats">
+                {Object.entries(projectsData[selectedProject].stats).map(([key, value]) => (
+                  <div key={key} className="modal-stat">
+                    <div className="modal-stat-value">{value}</div>
+                    <div className="modal-stat-label">{key.charAt(0).toUpperCase() + key.slice(1)}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="modal-features">
+                <h3>Key Features</h3>
+                <ul>
+                  {projectsData[selectedProject].features.map((feature, index) => (
+                    <li key={index}>{feature}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <button className="modal-donate-btn" onClick={() => navigate('/services')}>
+                <FaDonate /> Support This Project
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Testimonials Section */}
       <section className="testimonials-section">
@@ -238,21 +376,65 @@ function Home() {
         <div className="container">
           <h2 className="section-heading">AUDIO JUKEBOX</h2>
           <div className="audio-grid">
-            <button className="audio-btn">
+            <button className="audio-btn" onClick={() => setSelectedAudio('stotras')}>
               <span className="audio-icon"><GiMusicalNotes /></span>
               STOTRAS
             </button>
-            <button className="audio-btn">
+            <button className="audio-btn" onClick={() => setSelectedAudio('bhajans')}>
               <span className="audio-icon"><BiMusic /></span>
               BHAJANS
             </button>
-            <button className="audio-btn">
+            <button className="audio-btn" onClick={() => setSelectedAudio('mantras')}>
               <span className="audio-icon"><GiTempleGate /></span>
               MANTRAS
             </button>
           </div>
         </div>
       </section>
+
+      {/* Audio Modal */}
+      {selectedAudio && (
+        <div className="audio-modal-overlay" onClick={() => setSelectedAudio(null)}>
+          <div className="audio-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedAudio(null)}>×</button>
+            <div className="modal-header">
+              <div className="modal-icon">
+                {React.createElement(audioData[selectedAudio].icon)}
+              </div>
+              <h2>{audioData[selectedAudio].title}</h2>
+            </div>
+            <div className="modal-body">
+              <p className="modal-description">{audioData[selectedAudio].description}</p>
+              
+              <div className="modal-stats">
+                {Object.entries(audioData[selectedAudio].stats).map(([key, value]) => (
+                  <div key={key} className="modal-stat">
+                    <div className="modal-stat-value">{value}</div>
+                    <div className="modal-stat-label">{key.charAt(0).toUpperCase() + key.slice(1)}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="modal-tracks">
+                <h3>Popular Tracks</h3>
+                <div className="tracks-list">
+                  {audioData[selectedAudio].tracks.map((track, index) => (
+                    <div key={index} className="track-item">
+                      <span className="track-number">{index + 1}</span>
+                      <span className="track-name">{track}</span>
+                      <button className="track-play-btn">▶</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button className="modal-view-all-btn">
+                <BiMusic /> View All Tracks
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

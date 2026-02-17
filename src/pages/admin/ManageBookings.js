@@ -5,12 +5,13 @@ import './AdminManage.css';
 
 function ManageBookings() {
   const { bookings, setBookings } = useData();
-  const [localBookings, setLocalBookings] = useState([
-    { id: 1, name: 'John Doe', type: 'Room', date: 'Dec 15, 2025', status: 'Confirmed', amount: '₹600' },
-    { id: 2, name: 'Jane Smith', type: 'Marriage Hall', date: 'Dec 20, 2025', status: 'Pending', amount: '₹25,000' },
-    { id: 3, name: 'Mike Johnson', type: 'Room', date: 'Dec 18, 2025', status: 'Confirmed', amount: '₹250' },
-    { id: 4, name: 'Sarah Williams', type: 'Marriage Hall', date: 'Dec 25, 2025', status: 'Pending', amount: '₹15,000' }
-  ]);
+  const [localBookings, setLocalBookings] = useState([]);
+  
+  // Sync with Supabase bookings
+  React.useEffect(() => {
+    setLocalBookings(bookings);
+  }, [bookings]);
+  
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentBooking, setCurrentBooking] = useState(null);

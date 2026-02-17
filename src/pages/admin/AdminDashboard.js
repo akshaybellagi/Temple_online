@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useData } from '../../context/DataContext';
 import { FaCalendarAlt, FaHourglassHalf, FaDonate, FaUsers, FaHome, FaChurch, FaImage, FaUser } from 'react-icons/fa';
 import { GiTempleGate } from 'react-icons/gi';
 import './AdminDashboard.css';
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const { bookings, donations } = useData();
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('adminLoggedIn');
@@ -19,20 +21,25 @@ function AdminDashboard() {
     navigate('/admin/login');
   };
 
+  // Calculate real stats from Supabase data
+  const totalBookings = bookings.length;
+  const pendingBookings = bookings.filter(b => b.status === 'Pending').length;
+  const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+  const completedDonations = donations.filter(d => d.status === 'Completed').length;
+
   const stats = [
-    { title: 'Total Bookings', value: '156', icon: FaCalendarAlt, color: '#4CAF50' },
-    { title: 'Pending Approvals', value: '12', icon: FaHourglassHalf, color: '#FF9800' },
-    { title: 'E-Hundi Collections', value: '₹2.5L', icon: FaDonate, color: '#2196F3' },
-    { title: 'Active Users', value: '89', icon: FaUsers, color: '#9C27B0' }
+    { title: 'Total Bookings', value: totalBookings.toString(), icon: FaCalendarAlt, color: '#4CAF50' },
+    { title: 'Pending Approvals', value: pendingBookings.toString(), icon: FaHourglassHalf, color: '#FF9800' },
+    { title: 'Total Donations', value: `₹${(totalDonations / 1000).toFixed(1)}K`, icon: FaDonate, color: '#2196F3' },
+    { title: 'Completed Donations', value: completedDonations.toString(), icon: FaUsers, color: '#9C27B0' }
   ];
 
   const managementSections = [
     { title: 'Room Management', icon: FaHome, link: '/admin/rooms', description: 'Manage room availability and pricing' },
     { title: 'Marriage Hall', icon: FaChurch, link: '/admin/halls', description: 'Manage marriage hall bookings' },
-    { title: 'Seva Bookings', icon: GiTempleGate, link: '/admin/sevas', description: 'Manage seva bookings and schedules' },
+    { title: 'Temples', icon: GiTempleGate, link: '/admin/temples', description: 'Manage temple information' },
     { title: 'E-Hundi', icon: FaDonate, link: '/admin/donations', description: 'Manage online donations and E-Hundi' },
-    { title: 'Gallery', icon: FaImage, link: '/admin/gallery', description: 'Manage gallery images' },
-    { title: 'Users', icon: FaUser, link: '/admin/users', description: 'Manage user accounts' }
+    { title: 'Gallery', icon: FaImage, link: '/admin/gallery', description: 'Manage gallery images' }
   ];
 
   return (
@@ -75,30 +82,37 @@ function AdminDashboard() {
         <div className="recent-activity">
           <h2>Recent Activity</h2>
           <div className="activity-list">
-            <div className="activity-item">
-              <span className="activity-icon"><FaCalendarAlt /></span>
-              <div className="activity-content">
-                <p><strong>New Booking</strong></p>
-                <p>Room booking for Dec 15, 2025</p>
-                <span className="activity-time">2 hours ago</span>
+            {bookings.length === 0 && donations.length === 0 ? (
+              <div className="activity-item">
+                <div className="activity-content">
+                  <p>No recent activity</p>
+                  <span className="activity-time">Start by adding rooms and halls</span>
+                </div>
               </div>
-            </div>
-            <div className="activity-item">
-              <span className="activity-icon"><FaDonate /></span>
-              <div className="activity-content">
-                <p><strong>E-Hundi Received</strong></p>
-                <p>₹5,000 for Annadhana</p>
-                <span className="activity-time">5 hours ago</span>
-              </div>
-            </div>
-            <div className="activity-item">
-              <span className="activity-icon"><FaChurch /></span>
-              <div className="activity-content">
-                <p><strong>Hall Booking</strong></p>
-                <p>Main Hall for Dec 20, 2025</p>
-                <span className="activity-time">1 day ago</span>
-              </div>
-            </div>
+            ) : (
+              <>
+                {bookings.slice(0, 3).map((booking, index) => (
+                  <div key={`booking-${index}`} className="activity-item">
+                    <span className="activity-icon"><FaCalendarAlt /></span>
+                    <div className="activity-content">
+                      <p><strong>New {booking.type} Booking</strong></p>
+                      <p>{booking.name} - {booking.date}</p>
+                      <span className="activity-time">{booking.status}</span>
+                    </div>
+                  </div>
+                ))}
+                {donations.slice(0, 2).map((donation, index) => (
+                  <div key={`donation-${index}`} className="activity-item">
+                    <span className="activity-icon"><FaDonate /></span>
+                    <div className="activity-content">
+                      <p><strong>Donation Received</strong></p>
+                      <p>₹{donation.amount.toLocaleString()} for {donation.category}</p>
+                      <span className="activity-time">{donation.date}</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>

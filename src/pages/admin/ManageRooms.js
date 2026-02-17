@@ -1,57 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
+import { supabase } from '../../supabaseClient';
 import Receipt from '../../components/Receipt';
 import './AdminManage.css';
 
 function ManageRooms() {
-  const { rooms, setRooms, bookings } = useData();
-  
-  // Flatten rooms structure for admin table view
-  const flattenRooms = () => {
-    const flattened = [];
-    rooms.forEach(room => {
-      if (room.types && Array.isArray(room.types)) {
-        room.types.forEach((type, index) => {
-          flattened.push({
-            id: `${room.id}-${index}`,
-            parentId: room.id,
-            name: room.name,
-            type: type.name,
-            floor: type.name.includes('First Floor') ? 'First Floor' : 
-                   type.name.includes('Second Floor') ? 'Second Floor' : 
-                   type.name.includes('Ground Floor') ? 'Ground Floor' : 'N/A',
-            price: type.price,
-            available: type.available,
-            total: type.total,
-            lift: room.lift,
-            checkInTime: room.checkInTime || '',
-            checkOutTime: room.checkOutTime || '',
-            imageUrl: room.imageUrl || room.image || ''
-          });
-        });
-      }
-    });
-    return flattened;
-  };
-
-  const [adminRooms, setAdminRooms] = useState(flattenRooms());
-
-  // Sync adminRooms when rooms from DataContext changes
-  useEffect(() => {
-    setAdminRooms(flattenRooms());
-  }, [rooms]);
-
+  const { rooms, bookings, refreshData } = useData();
+  const [roomTypes, setRoomTypes] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [currentRoom, setCurrentRoom] = useState(null);
+  const [currentRoomType, setCurrentRoomType] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    description: '',
+    type: '',
     price: '',
     total: '',
-    imageUrl: '',
-    lift: false
+    lift: false,
+    floor: '',
+    occupancy: '',
+    commode_type: '',
+    ac: false
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -59,189 +28,158 @@ function ManageRooms() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
 
-  const handleUpdatePrice = (id, newPrice) => {
-    // Update adminRooms display
-    setAdminRooms(adminRooms.map(room => 
-      room.id === id ? { ...room, price: parseInt(newPrice) } : room
-    ));
-    
-    // Update DataContext rooms structure
-    const updatedRooms = rooms.map(room => {
-      if (room.types && Array.isArray(room.types)) {
-        return {
-          ...room,
-          types: room.types.map((type, index) => {
-            if (`${room.id}-${index}` === id) {
-              return { ...type, price: parseInt(newPrice) };
-            }
-            return type;
-          })
-        };
+  // Flatten rooms for display in admin panel
+  useEffect(() => {
+    // Flatten the grouped rooms structure for admin display
+    const flatRooms = [];
+    rooms.forEach(roomGroup => {
+      if (roomGroup.types && roomGroup.types.length > 0) {
+        roomGroup.types.forEach(type => {
+          flatRooms.push({
+            id: type.id,
+            name: roomGroup.name,
+            type: type.name,
+            price: type.price,
+            available: type.available,
+            total: type.total,
+            lift: roomGroup.lift,
+            floor: type.floor,
+            occupancy: type.occupancy,
+            commode_type: type.commode_type,
+            ac: type.ac,
+            image: roomGroup.image
+          });
+        });
       }
-      return room;
     });
-    setRooms(updatedRooms);
+    setRoomTypes(flatRooms);
+  }, [rooms]);
+
+  const handleAdd = () => {
+    setFormData({
+      name: '',
+      type: '',
+      price: '',
+      total: '',
+      lift: false,
+      floor: '',
+      occupancy: '',
+      commode_type: '',
+      ac: false
+    });
+    setShowAddModal(true);
   };
 
   const handleEdit = (room) => {
-    setCurrentRoom(room);
+    setCurrentRoomType(room);
     setFormData({
       name: room.name,
-      description: room.type,
+      type: room.type,
       price: room.price,
       total: room.total,
-      imageUrl: room.imageUrl || room.image || '',
-      lift: room.lift
+      lift: room.lift,
+      floor: room.floor || '',
+      occupancy: room.occupancy || '',
+      commode_type: room.commode_type || '',
+      ac: room.ac || false
     });
     setShowEditModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this room?')) {
-      // Remove from admin display
-      setAdminRooms(adminRooms.filter(room => room.id !== id));
-      
-      // Update DataContext - remove the specific type or entire room if it's the last type
-      const updatedRooms = rooms.map(room => {
-        if (room.types && Array.isArray(room.types)) {
-          const filteredTypes = room.types.filter((type, index) => `${room.id}-${index}` !== id);
-          if (filteredTypes.length === 0) {
-            return null; // Mark for removal
-          }
-          return { ...room, types: filteredTypes };
-        }
-        return room;
-      }).filter(room => room !== null);
-      
-      setRooms(updatedRooms);
+  const handleDelete = async (roomId) => {
+    if (!window.confirm('Are you sure you want to delete this room?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('rooms')
+        .delete()
+        .eq('id', roomId);
+
+      if (error) throw error;
+
+      await refreshData();
       alert('Room deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      alert('Failed to delete room: ' + error.message);
     }
   };
 
-  const handleSubmitAdd = (e) => {
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
-    
-    // Create new room in DataContext structure
-    const newRoom = {
-      id: rooms.length + 1,
-      name: formData.name,
-      image: formData.imageUrl || 'https://via.placeholder.com/300x200/3498db/ffffff?text=Room',
-      imageUrl: formData.imageUrl,
-      lift: formData.lift,
-      types: [{
-        name: formData.description,
-        price: parseInt(formData.price),
-        available: parseInt(formData.total),
-        total: parseInt(formData.total)
-      }]
-    };
-    
-    setRooms([...rooms, newRoom]);
-    
-    // Update admin display
-    setAdminRooms([...adminRooms, {
-      id: `${newRoom.id}-0`,
-      parentId: newRoom.id,
-      name: formData.name,
-      type: formData.description,
-      floor: 'N/A',
-      price: parseInt(formData.price),
-      available: parseInt(formData.total),
-      total: parseInt(formData.total),
-      lift: formData.lift,
-      imageUrl: formData.imageUrl
-    }]);
-    
-    setShowAddModal(false);
-    setFormData({ name: '', description: '', price: '', total: '', imageUrl: '', lift: false });
-    alert('Room added successfully!');
-  };
 
-  const handleSubmitEdit = (e) => {
-    e.preventDefault();
-    
-    // Update adminRooms display
-    setAdminRooms(adminRooms.map(room => 
-      room.id === currentRoom.id 
-        ? { 
-            ...room, 
-            name: formData.name,
-            type: formData.description,
-            price: parseInt(formData.price), 
-            total: parseInt(formData.total),
-            imageUrl: formData.imageUrl,
-            lift: formData.lift
-          }
-        : room
-    ));
-    
-    // Find the parent room and type index
-    let parentRoomId = null;
-    let typeIndex = null;
-    
-    rooms.forEach(room => {
-      if (room.types && Array.isArray(room.types)) {
-        room.types.forEach((type, index) => {
-          if (`${room.id}-${index}` === currentRoom.id) {
-            parentRoomId = room.id;
-            typeIndex = index;
-          }
-        });
-      }
-    });
-    
-    if (parentRoomId !== null && typeIndex !== null) {
-      // Create a new separate room for this edited entry
-      const newRoomId = Math.max(...rooms.map(r => r.id)) + 1;
-      const newRoom = {
-        id: newRoomId,
+    try {
+      const roomData = {
         name: formData.name,
-        image: formData.imageUrl || 'https://via.placeholder.com/300x200/3498db/ffffff?text=Room',
-        imageUrl: formData.imageUrl,
+        type: formData.type,
+        price: parseInt(formData.price),
+        total: parseInt(formData.total),
+        available: parseInt(formData.total),
         lift: formData.lift,
-        types: [{
-          name: formData.description,
-          price: parseInt(formData.price),
-          available: parseInt(formData.total),
-          total: parseInt(formData.total)
-        }]
+        floor: formData.floor,
+        occupancy: formData.occupancy,
+        commode_type: formData.commode_type,
+        ac: formData.ac,
+        image: 'https://via.placeholder.com/300x200/3498db/ffffff?text=Room'
       };
-      
-      // Remove the old type from parent room and add new room
-      const updatedRooms = rooms.map(room => {
-        if (room.id === parentRoomId) {
-          const filteredTypes = room.types.filter((_, index) => index !== typeIndex);
-          if (filteredTypes.length === 0) {
-            return null; // Mark for removal if no types left
-          }
-          return { ...room, types: filteredTypes };
-        }
-        return room;
-      }).filter(room => room !== null);
-      
-      setRooms([...updatedRooms, newRoom]);
-      
-      // Update adminRooms with new ID
-      setAdminRooms(adminRooms.map(room => 
-        room.id === currentRoom.id 
-          ? { 
-              ...room,
-              id: `${newRoomId}-0`,
-              parentId: newRoomId,
-              name: formData.name,
-              type: formData.description,
-              price: parseInt(formData.price), 
-              total: parseInt(formData.total),
-              available: parseInt(formData.total),
-              imageUrl: formData.imageUrl,
-              lift: formData.lift
-            }
-          : room
-      ));
+
+      const { error } = await supabase
+        .from('rooms')
+        .insert([roomData]);
+
+      if (error) throw error;
+
+      await refreshData();
+      setShowAddModal(false);
+      setFormData({ 
+        name: '', 
+        type: '', 
+        price: '', 
+        total: '', 
+        lift: false,
+        floor: '',
+        occupancy: '',
+        commode_type: '',
+        ac: false
+      });
+      alert('Room added successfully!');
+    } catch (error) {
+      console.error('Error adding room:', error);
+      alert('Failed to add room: ' + error.message);
     }
-    
-    setShowEditModal(false);
-    alert('Room updated successfully!');
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const { error } = await supabase
+        .from('rooms')
+        .update({
+          name: formData.name,
+          type: formData.type,
+          price: parseInt(formData.price),
+          total: parseInt(formData.total),
+          available: parseInt(formData.total),
+          lift: formData.lift,
+          floor: formData.floor,
+          occupancy: formData.occupancy,
+          commode_type: formData.commode_type,
+          ac: formData.ac
+        })
+        .eq('id', currentRoomType.id);
+
+      if (error) throw error;
+
+      await refreshData();
+      setShowEditModal(false);
+      alert('Room updated successfully!');
+    } catch (error) {
+      console.error('Error updating room:', error);
+      alert('Failed to update room: ' + error.message);
+    }
   };
 
   const handleChange = (e) => {
@@ -253,12 +191,16 @@ function ManageRooms() {
   };
 
   // Filter room bookings
-  const roomBookings = bookings.filter(booking => booking.type === 'Room');
+  const roomBookings = bookings.filter(booking => 
+    booking.booking_type === 'room' || booking.type === 'Room'
+  );
 
   const filteredBookings = roomBookings.filter(booking => {
-    const matchesSearch = booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         booking.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || booking.status.toLowerCase() === filterStatus;
+    const matchesSearch = 
+      (booking.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || 
+      (booking.status || '').toLowerCase() === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -272,10 +214,26 @@ function ManageRooms() {
     setShowReceipt(true);
   };
 
-  const handleStatusChange = (bookingId, newStatus) => {
-    console.log(`Updating booking ${bookingId} to ${newStatus}`);
-    setShowBookingModal(false);
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      await refreshData();
+      setShowBookingModal(false);
+      alert(`Booking status updated to ${newStatus}!`);
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      alert('Failed to update booking status: ' + error.message);
+    }
   };
+
+  const totalRooms = roomTypes.reduce((sum, type) => sum + (type.total || 0), 0);
+  const availableRooms = roomTypes.reduce((sum, type) => sum + (type.available || 0), 0);
 
   return (
     <div className="admin-manage-page">
@@ -290,11 +248,11 @@ function ManageRooms() {
         <div className="stats-row">
           <div className="stat-box">
             <h3>Total Rooms</h3>
-            <p className="stat-value">{adminRooms.reduce((sum, room) => sum + room.total, 0)}</p>
+            <p className="stat-value">{totalRooms}</p>
           </div>
           <div className="stat-box">
             <h3>Available</h3>
-            <p className="stat-value">{adminRooms.reduce((sum, room) => sum + room.available, 0)}</p>
+            <p className="stat-value">{availableRooms}</p>
           </div>
           <div className="stat-box">
             <h3>Total Bookings</h3>
@@ -302,17 +260,15 @@ function ManageRooms() {
           </div>
           <div className="stat-box">
             <h3>Pending</h3>
-            <p className="stat-value">{roomBookings.filter(b => b.status === 'Pending').length}</p>
+            <p className="stat-value">
+              {roomBookings.filter(b => (b.status || '').toLowerCase() === 'pending').length}
+            </p>
           </div>
         </div>
 
         <div className="management-section">
-          <h2>Room Inventory</h2>
-          <button className="btn-add" onClick={() => setShowAddModal(true)}>+ Add New Room</button>
-        </div>
-
-        <div className="manage-actions">
-          <input type="text" placeholder="Search rooms..." className="search-input" />
+          <h2>Rooms</h2>
+          <button className="btn-add" onClick={handleAdd}>+ Add Room</button>
         </div>
 
         <div className="table-container">
@@ -321,38 +277,51 @@ function ManageRooms() {
               <tr>
                 <th>ID</th>
                 <th>Room Name</th>
-                <th>Type/Description</th>
+                <th>Type</th>
                 <th>Price (₹)</th>
-                <th>Available</th>
+                <th>Available/Total</th>
                 <th>Lift</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {adminRooms.map(room => (
-                <tr key={room.id}>
-                  <td>#{room.id}</td>
-                  <td>{room.name}</td>
-                  <td>{room.type}</td>
-                  <td>
-                    <input 
-                      type="number" 
-                      value={room.price}
-                      onChange={(e) => handleUpdatePrice(room.id, e.target.value)}
-                      className="price-input"
-                    />
-                  </td>
-                  <td>{room.available}/{room.total}</td>
-                  <td>
-                    <span className={`status-badge ${room.lift ? 'confirmed' : 'cancelled'}`}>
-                      {room.lift ? 'Yes' : 'No'}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="btn-action btn-edit" onClick={() => handleEdit(room)}>Edit</button>
+              {roomTypes.length > 0 ? (
+                roomTypes.map(room => (
+                  <tr key={room.id}>
+                    <td>#{room.id}</td>
+                    <td>{room.name}</td>
+                    <td>{room.type}</td>
+                    <td>₹{room.price}</td>
+                    <td>{room.available}/{room.total}</td>
+                    <td>
+                      <span className={`status-badge ${room.lift ? 'confirmed' : 'cancelled'}`}>
+                        {room.lift ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn-action btn-edit" 
+                        onClick={() => handleEdit(room)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="btn-action btn-delete" 
+                        onClick={() => handleDelete(room.id)}
+                        style={{ marginLeft: '5px' }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                    No rooms found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -390,7 +359,7 @@ function ManageRooms() {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Check-in Date</th>
+                <th>Check-in</th>
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -398,16 +367,16 @@ function ManageRooms() {
             </thead>
             <tbody>
               {filteredBookings.length > 0 ? (
-                filteredBookings.map((booking, index) => (
-                  <tr key={index}>
-                    <td>#{index + 1}</td>
+                filteredBookings.map((booking) => (
+                  <tr key={booking.id}>
+                    <td>#{booking.id}</td>
                     <td>{booking.name}</td>
                     <td>{booking.email}</td>
                     <td>{booking.phone}</td>
-                    <td>{booking.date}</td>
-                    <td>{booking.amount}</td>
+                    <td>{booking.check_in_date || booking.date}</td>
+                    <td>₹{booking.amount}</td>
                     <td>
-                      <span className={`status-badge ${booking.status.toLowerCase()}`}>
+                      <span className={`status-badge ${(booking.status || '').toLowerCase()}`}>
                         {booking.status}
                       </span>
                     </td>
@@ -440,77 +409,26 @@ function ManageRooms() {
         </div>
       </div>
 
-      {/* Booking Details Modal */}
-      {showBookingModal && selectedBooking && (
-        <div className="modal-overlay" onClick={() => setShowBookingModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Room Booking Details</h2>
-            <div className="booking-details">
-              <p><strong>Booking ID:</strong> #{Math.random().toString(36).substring(2, 9).toUpperCase()}</p>
-              <p><strong>Guest Name:</strong> {selectedBooking.name}</p>
-              <p><strong>Email:</strong> {selectedBooking.email}</p>
-              <p><strong>Phone:</strong> {selectedBooking.phone}</p>
-              <p><strong>Room Name:</strong> {selectedBooking.roomName || 'Dheerendra Vasathi Gruha'}</p>
-              <p><strong>Room Number:</strong> {selectedBooking.roomNumber || Math.floor(Math.random() * 100) + 101}</p>
-              <p><strong>Room Type:</strong> {selectedBooking.roomType || 'NON-AC | 2-Occupancy'}</p>
-              <p><strong>Check-in Date:</strong> {selectedBooking.date}</p>
-              <p><strong>Number of Guests:</strong> {selectedBooking.guests || '2'}</p>
-              <p><strong>Amount:</strong> {selectedBooking.amount}</p>
-              <p><strong>Status:</strong> <span className={`status-badge ${selectedBooking.status.toLowerCase()}`}>{selectedBooking.status}</span></p>
-              {selectedBooking.specialRequests && (
-                <p><strong>Special Requests:</strong> {selectedBooking.specialRequests}</p>
-              )}
-            </div>
-
-            <div className="status-buttons">
-              <button 
-                className="btn-action btn-view"
-                onClick={() => handleStatusChange(selectedBooking.id, 'Confirmed')}
-              >
-                Confirm Booking
-              </button>
-              <button 
-                className="btn-action btn-edit"
-                onClick={() => handleStatusChange(selectedBooking.id, 'Completed')}
-              >
-                Check-out
-              </button>
-              <button 
-                className="btn-action btn-delete"
-                onClick={() => handleStatusChange(selectedBooking.id, 'Cancelled')}
-              >
-                Cancel Booking
-              </button>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn-action" onClick={() => setShowBookingModal(false)}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Add Room Modal */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Add New Room</h2>
+            <h2>Add Room</h2>
             <form className="modal-form" onSubmit={handleSubmitAdd}>
               <input 
                 type="text" 
                 name="name"
-                placeholder="Room Name" 
+                placeholder="Room Name (e.g., Dheerendra Vasathi Gruha)" 
                 value={formData.name}
                 onChange={handleChange}
                 required 
               />
-              <textarea 
-                name="description"
-                placeholder="Type/Description (e.g., NON-AC | 2-Occupancy | First Floor)" 
-                value={formData.description}
+              <input 
+                type="text" 
+                name="type"
+                placeholder="Type (e.g., NON-AC | 2-Occupancy | First Floor | Western Commode)" 
+                value={formData.type}
                 onChange={handleChange}
-                rows="2"
                 required 
               />
               <input 
@@ -524,35 +442,66 @@ function ManageRooms() {
               <input 
                 type="number" 
                 name="total"
-                placeholder="Total Rooms Available" 
+                placeholder="Total rooms available" 
                 value={formData.total}
                 onChange={handleChange}
                 required 
               />
               <input 
-                type="url" 
-                name="imageUrl"
-                placeholder="Image URL (optional)" 
-                value={formData.imageUrl}
+                type="text" 
+                name="floor"
+                placeholder="Floor (e.g., First Floor, Ground Floor)" 
+                value={formData.floor}
                 onChange={handleChange}
               />
-              <label>
+              <input 
+                type="text" 
+                name="occupancy"
+                placeholder="Occupancy (e.g., 2-Occupancy)" 
+                value={formData.occupancy}
+                onChange={handleChange}
+              />
+              <input 
+                type="text" 
+                name="commode_type"
+                placeholder="Commode Type (e.g., Western, Indian)" 
+                value={formData.commode_type}
+                onChange={handleChange}
+              />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input 
+                  type="checkbox" 
+                  name="ac"
+                  checked={formData.ac}
+                  onChange={handleChange}
+                />
+                <span>AC Available</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input 
                   type="checkbox" 
                   name="lift"
                   checked={formData.lift}
                   onChange={handleChange}
-                /> Has Lift
+                />
+                <span>Has Lift</span>
               </label>
               <div className="modal-actions">
-                <button type="submit" className="btn-action btn-view">Add Room</button>
-                <button type="button" className="btn-action btn-delete" onClick={() => setShowAddModal(false)}>Cancel</button>
+                <button type="submit" className="btn-action btn-view">Add</button>
+                <button 
+                  type="button" 
+                  className="btn-action btn-delete" 
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* Edit Room Modal */}
       {showEditModal && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -566,12 +515,12 @@ function ManageRooms() {
                 onChange={handleChange}
                 required 
               />
-              <textarea 
-                name="description"
-                placeholder="Type/Description" 
-                value={formData.description}
+              <input 
+                type="text" 
+                name="type"
+                placeholder="Type" 
+                value={formData.type}
                 onChange={handleChange}
-                rows="2"
                 required 
               />
               <input 
@@ -585,34 +534,117 @@ function ManageRooms() {
               <input 
                 type="number" 
                 name="total"
-                placeholder="Total Rooms Available" 
+                placeholder="Total rooms available" 
                 value={formData.total}
                 onChange={handleChange}
                 required 
               />
               <input 
-                type="url" 
-                name="imageUrl"
-                placeholder="Image URL (optional)" 
-                value={formData.imageUrl}
+                type="text" 
+                name="floor"
+                placeholder="Floor" 
+                value={formData.floor}
                 onChange={handleChange}
               />
-              <label>
+              <input 
+                type="text" 
+                name="occupancy"
+                placeholder="Occupancy" 
+                value={formData.occupancy}
+                onChange={handleChange}
+              />
+              <input 
+                type="text" 
+                name="commode_type"
+                placeholder="Commode Type" 
+                value={formData.commode_type}
+                onChange={handleChange}
+              />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input 
+                  type="checkbox" 
+                  name="ac"
+                  checked={formData.ac}
+                  onChange={handleChange}
+                />
+                <span>AC Available</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input 
                   type="checkbox" 
                   name="lift"
                   checked={formData.lift}
                   onChange={handleChange}
-                /> Has Lift
+                />
+                <span>Has Lift</span>
               </label>
               <div className="modal-actions">
-                <button type="submit" className="btn-action btn-view">Update Room</button>
-                <button type="button" className="btn-action btn-delete" onClick={() => setShowEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn-action btn-view">Update</button>
+                <button 
+                  type="button" 
+                  className="btn-action btn-delete" 
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Booking Details Modal */}
+      {showBookingModal && selectedBooking && (
+        <div className="modal-overlay" onClick={() => setShowBookingModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Room Booking Details</h2>
+            <div className="booking-details">
+              <p><strong>Booking ID:</strong> #{selectedBooking.id}</p>
+              <p><strong>Guest Name:</strong> {selectedBooking.name}</p>
+              <p><strong>Email:</strong> {selectedBooking.email}</p>
+              <p><strong>Phone:</strong> {selectedBooking.phone}</p>
+              <p><strong>Check-in Date:</strong> {selectedBooking.check_in_date || selectedBooking.date}</p>
+              <p><strong>Check-out Date:</strong> {selectedBooking.check_out_date || 'N/A'}</p>
+              <p><strong>Room Type:</strong> {selectedBooking.room_type || 'N/A'}</p>
+              <p><strong>Number of Guests:</strong> {selectedBooking.guests || 'N/A'}</p>
+              <p><strong>Amount:</strong> ₹{selectedBooking.amount}</p>
+              <p><strong>Status:</strong> <span className={`status-badge ${(selectedBooking.status || '').toLowerCase()}`}>{selectedBooking.status}</span></p>
+              {selectedBooking.special_requests && (
+                <p><strong>Special Requests:</strong> {selectedBooking.special_requests}</p>
+              )}
+            </div>
+
+            <div className="status-buttons">
+              <button 
+                className="btn-action btn-view"
+                onClick={() => handleStatusChange(selectedBooking.id, 'Confirmed')}
+              >
+                Confirm
+              </button>
+              <button 
+                className="btn-action btn-edit"
+                onClick={() => handleStatusChange(selectedBooking.id, 'Completed')}
+              >
+                Complete
+              </button>
+              <button 
+                className="btn-action btn-delete"
+                onClick={() => handleStatusChange(selectedBooking.id, 'Cancelled')}
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-action" onClick={() => setShowBookingModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Receipt Modal */}
       {showReceipt && selectedBooking && (
         <Receipt booking={selectedBooking} onClose={() => setShowReceipt(false)} />
       )}

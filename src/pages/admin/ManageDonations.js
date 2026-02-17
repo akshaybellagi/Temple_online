@@ -5,13 +5,14 @@ import Receipt from '../../components/Receipt';
 import './AdminManage.css';
 
 function ManageDonations() {
-  const { donations, setDonations } = useData();
-  const [localDonations, setLocalDonations] = useState([
-    { id: 1, donor: 'Rajesh Kumar', category: 'Annadhana', amount: 5000, date: 'Dec 10, 2025', status: 'Completed' },
-    { id: 2, donor: 'Priya Sharma', category: 'Goshala', amount: 10000, date: 'Dec 12, 2025', status: 'Completed' },
-    { id: 3, donor: 'Amit Patel', category: 'Constructions', amount: 25000, date: 'Dec 13, 2025', status: 'Pending' },
-    { id: 4, donor: 'Sunita Reddy', category: 'Vidhyadhana', amount: 15000, date: 'Dec 14, 2025', status: 'Completed' }
-  ]);
+  const { donations, deleteDonation } = useData();
+  const [localDonations, setLocalDonations] = useState([]);
+  
+  // Sync with Supabase donations
+  React.useEffect(() => {
+    setLocalDonations(donations);
+  }, [donations]);
+  
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentDonation, setCurrentDonation] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
@@ -20,6 +21,23 @@ function ManageDonations() {
     const amount = typeof d.amount === 'number' ? d.amount : parseFloat(d.amount.replace(/[₹,]/g, '')) || 0;
     return sum + amount;
   }, 0);
+
+  // Calculate this month's donations
+  const thisMonthDonations = donations.reduce((sum, d) => {
+    const donationDate = new Date(d.date);
+    const now = new Date();
+    const isThisMonth = donationDate.getMonth() === now.getMonth() && 
+                        donationDate.getFullYear() === now.getFullYear();
+    
+    if (isThisMonth) {
+      const amount = typeof d.amount === 'number' ? d.amount : parseFloat(d.amount.replace(/[₹,]/g, '')) || 0;
+      return sum + amount;
+    }
+    return sum;
+  }, 0);
+
+  // Calculate total unique donors
+  const uniqueDonors = new Set(donations.map(d => d.name || d.donor)).size;
 
   const handleView = (donation) => {
     setCurrentDonation(donation);
@@ -38,10 +56,14 @@ function ManageDonations() {
     setShowReceipt(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this donation record?')) {
-      setDonations(donations.filter(d => d.id !== id));
-      alert('Donation record deleted successfully!');
+      try {
+        await deleteDonation(id);
+        alert('Donation record deleted successfully!');
+      } catch (error) {
+        alert('Error deleting donation: ' + error.message);
+      }
     }
   };
 
@@ -62,11 +84,11 @@ function ManageDonations() {
           </div>
           <div className="stat-box">
             <h3>This Month</h3>
-            <p className="stat-value">₹55,000</p>
+            <p className="stat-value">₹{thisMonthDonations.toLocaleString()}</p>
           </div>
           <div className="stat-box">
             <h3>Total Donors</h3>
-            <p className="stat-value">156</p>
+            <p className="stat-value">{uniqueDonors}</p>
           </div>
         </div>
 

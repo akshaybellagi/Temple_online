@@ -66,7 +66,7 @@ function Services() {
     });
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const total = calculateTotal();
     
@@ -82,10 +82,6 @@ function Services() {
     // Add donation to global state
     const donationData = {
       name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      panNumber: formData.panNumber,
       purpose: purposes,
       amount: `₹${total}`,
       date: new Date().toLocaleDateString('en-IN', { 
@@ -96,8 +92,13 @@ function Services() {
       status: 'Completed'
     };
     
-    addDonation(donationData);
-    setStep('confirmation');
+    try {
+      await addDonation(donationData);
+      setStep('confirmation');
+    } catch (error) {
+      console.error('Error submitting donation:', error);
+      alert('Failed to submit donation. Please try again.');
+    }
   };
 
   const handleBackToDonations = () => {

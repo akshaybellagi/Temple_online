@@ -2,9 +2,15 @@ import React from 'react';
 import './Services.css';
 
 function Panchanga() {
+  // Get today's date dynamically
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = today.toLocaleDateString('en-US', options);
+  const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+
   const todayPanchanga = {
-    date: 'December 21, 2025',
-    day: 'Friday',
+    date: formattedDate,
+    day: dayName,
     tithi: 'Ekadashi',
     nakshatra: 'Rohini',
     yoga: 'Siddha',

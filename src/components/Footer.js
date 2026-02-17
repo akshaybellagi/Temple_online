@@ -34,7 +34,7 @@ function Footer() {
             <ul>
               <li><Link to="/">Home</Link></li>
               <li><Link to="/about">About Us</Link></li>
-              <li><Link to="/services">Services & Sevas</Link></li>
+              <li><Link to="/services">Services</Link></li>
               <li><Link to="/booking">Book Now</Link></li>
               <li><Link to="/gallery">Gallery</Link></li>
               <li><Link to="/contact">Contact Us</Link></li>
@@ -46,7 +46,6 @@ function Footer() {
             <ul>
               <li><Link to="/booking">Room Booking</Link></li>
               <li><Link to="/booking">Marriage Hall</Link></li>
-              <li><Link to="/services">Seva Bookings</Link></li>
               <li><Link to="/services">Donations</Link></li>
               <li><Link to="/services">Panchanga</Link></li>
               <li><Link to="/services">Live Darshan</Link></li>

@@ -19,11 +19,11 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageBookings from './pages/admin/ManageBookings';
 import ManageRooms from './pages/admin/ManageRooms';
 import ManageHalls from './pages/admin/ManageHalls';
-import ManageSevas from './pages/admin/ManageSevas';
 import ManageDonations from './pages/admin/ManageDonations';
 import ManageGallery from './pages/admin/ManageGallery';
 import ManageContent from './pages/admin/ManageContent';
 import ManageUsers from './pages/admin/ManageUsers';
+import ManageTemples from './pages/admin/ManageTemples';
 import Settings from './pages/admin/Settings';
 import './App.css';
 
@@ -40,11 +40,11 @@ function App() {
           <Route path="/admin/bookings" element={<ManageBookings />} />
           <Route path="/admin/rooms" element={<ManageRooms />} />
           <Route path="/admin/halls" element={<ManageHalls />} />
-          <Route path="/admin/sevas" element={<ManageSevas />} />
           <Route path="/admin/donations" element={<ManageDonations />} />
           <Route path="/admin/gallery" element={<ManageGallery />} />
           <Route path="/admin/content" element={<ManageContent />} />
           <Route path="/admin/users" element={<ManageUsers />} />
+          <Route path="/admin/temples" element={<ManageTemples />} />
           <Route path="/admin/settings" element={<Settings />} />
           
           {/* Public Routes */}

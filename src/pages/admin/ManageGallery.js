@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import './AdminManage.css';
 
 function ManageGallery() {
-  const { galleryImages, setGalleryImages } = useData();
+  const { galleryImages, addGalleryImage, updateGalleryImage, deleteGalleryImage } = useData();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
@@ -29,31 +29,37 @@ function ManageGallery() {
     setShowEditModal(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this image?')) {
-      setGalleryImages(galleryImages.filter(img => img.id !== id));
-      alert('Image deleted successfully!');
+      try {
+        await deleteGalleryImage(id);
+        alert('Image deleted successfully!');
+      } catch (error) {
+        alert('Error deleting image: ' + error.message);
+      }
     }
   };
 
-  const handleSubmitAdd = (e) => {
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
-    const newImage = {
-      id: galleryImages.length + 1,
-      ...formData
-    };
-    setGalleryImages([...galleryImages, newImage]);
-    setShowAddModal(false);
-    alert('Image added successfully!');
+    try {
+      await addGalleryImage(formData);
+      setShowAddModal(false);
+      alert('Image added successfully!');
+    } catch (error) {
+      alert('Error adding image: ' + error.message);
+    }
   };
 
-  const handleSubmitEdit = (e) => {
+  const handleSubmitEdit = async (e) => {
     e.preventDefault();
-    setGalleryImages(galleryImages.map(img => 
-      img.id === currentImage.id ? { ...img, ...formData } : img
-    ));
-    setShowEditModal(false);
-    alert('Image updated successfully!');
+    try {
+      await updateGalleryImage(currentImage.id, formData);
+      setShowEditModal(false);
+      alert('Image updated successfully!');
+    } catch (error) {
+      alert('Error updating image: ' + error.message);
+    }
   };
 
   const handleChange = (e) => {
@@ -63,14 +69,7 @@ function ManageGallery() {
     });
   };
 
-  const [images] = useState([
-    { id: 1, title: 'Main Temple', category: 'temple', url: 'https://via.placeholder.com/300x200' },
-    { id: 2, title: 'Festival Celebration', category: 'events', url: 'https://via.placeholder.com/300x200' },
-    { id: 3, title: 'Prayer Hall', category: 'temple', url: 'https://via.placeholder.com/300x200' },
-    { id: 4, title: 'Annual Event', category: 'events', url: 'https://via.placeholder.com/300x200' },
-    { id: 5, title: 'Guest Rooms', category: 'facilities', url: 'https://via.placeholder.com/300x200' },
-    { id: 6, title: 'Dining Hall', category: 'facilities', url: 'https://via.placeholder.com/300x200' }
-  ]);
+
 
   return (
     <div className="admin-manage-page">

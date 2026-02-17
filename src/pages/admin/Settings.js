@@ -4,10 +4,10 @@ import './AdminManage.css';
 
 function Settings() {
   const [settings, setSettings] = useState({
-    siteName: 'SRS Matha Mantralayam',
-    email: 'info@srsmatha.org',
+    siteName: 'Temple Management',
+    email: 'info@example.org',
     phone: '+91 XXXXXXXXXX',
-    address: 'Mantralayam, Andhra Pradesh',
+    address: 'City, State',
     currency: 'INR',
     timezone: 'Asia/Kolkata',
     emailNotifications: true,

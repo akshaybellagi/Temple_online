@@ -3,12 +3,9 @@ import { Link } from 'react-router-dom';
 import './AdminManage.css';
 
 function ManageUsers() {
-  const [users] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', phone: '+91 9876543210', bookings: 3, status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '+91 9876543211', bookings: 5, status: 'Active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', phone: '+91 9876543212', bookings: 2, status: 'Blocked' },
-    { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', phone: '+91 9876543213', bookings: 7, status: 'Active' }
-  ]);
+  const [users] = useState([]);
+  // Note: User management would need a separate users table in Supabase
+  // For now, this shows empty until you implement user registration
 
   return (
     <div className="admin-manage-page">

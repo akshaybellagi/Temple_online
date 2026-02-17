@@ -2,22 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useSearchParams } from 'react-router-dom';
 import { FaHome, FaDonate, FaChurch, FaBuilding, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
-import { GiTempleGate, GiOilDrum, GiWaterDrop, GiFireBowl, GiCarousel } from 'react-icons/gi';
-import { GiPrayer } from 'react-icons/gi';
-import { FaAppleAlt } from 'react-icons/fa';
-import { GiFootprint } from 'react-icons/gi';
-import { FaGlassMartini } from 'react-icons/fa';
 import Receipt from '../components/Receipt';
 import './Booking.css';
 
 function Booking() {
-  const { rooms, marriageHalls, addBooking } = useData();
+  const { rooms, marriageHalls, addBooking, loading } = useData();
   const [searchParams] = useSearchParams();
   const [bookingType, setBookingType] = useState('rooms');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedSeva, setSelectedSeva] = useState(null);
-  const [bookingStep, setBookingStep] = useState('service-selection'); // service-selection, calendar, availability, form, confirmation, seva-selection
+  const [bookingStep, setBookingStep] = useState('service-selection'); // service-selection, calendar, availability, form, confirmation
   const [showReceipt, setShowReceipt] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState(null);
   
@@ -37,106 +31,23 @@ function Booking() {
   // Check URL parameters on component mount
   useEffect(() => {
     const type = searchParams.get('type');
-    if (type === 'rooms' || type === 'marriage' || type === 'seva') {
+    if (type === 'rooms' || type === 'marriage') {
       setBookingType(type);
-      if (type === 'seva') {
-        setBookingStep('seva-selection');
-      } else {
-        setBookingStep('calendar');
-      }
+      setBookingStep('calendar');
     }
   }, [searchParams]);
 
-  const sevaList = [
-    { 
-      id: 1, 
-      name: 'PANCHAMRUTHAM', 
-      price: 100, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiOilDrum
-    },
-    { 
-      id: 2, 
-      name: 'KSHEERABHI SHEKAM', 
-      price: 100, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: FaGlassMartini
-    },
-    { 
-      id: 3, 
-      name: 'ARCHANA SAHITA HASTODAKA', 
-      price: 150, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiPrayer
-    },
-    { 
-      id: 4, 
-      name: 'PHALA PANCHAMRUTHA', 
-      price: 200, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: FaAppleAlt
-    },
-    { 
-      id: 5, 
-      name: 'SARVA SEVA', 
-      price: 300, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiTempleGate
-    },
-    { 
-      id: 6, 
-      name: 'TAILA NANDA DEEPAM (1 MONTH)', 
-      price: 300, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiOilDrum
-    },
-    { 
-      id: 7, 
-      name: 'UTSAVARAYARA PADAPOOJA', 
-      price: 300, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiFootprint
-    },
-    { 
-      id: 8, 
-      name: 'MAHA POOJA', 
-      price: 500, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiTempleGate
-    },
-    { 
-      id: 9, 
-      name: 'UNJAL SEVA', 
-      price: 500, 
-      time: '06:45 PM Evening',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Darshana can be had from Gate 6 or 7. Prasada to be collected in counter no 10.',
-      icon: GiCarousel
-    },
-    { 
-      id: 10, 
-      name: 'ABHISHEK', 
-      price: 1000, 
-      time: '07:30 AM Morning',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 7:30am for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiWaterDrop
-    },
-    { 
-      id: 11, 
-      name: 'ARATI', 
-      price: 500, 
-      time: '06:45 PM Evening',
-      description: 'Sevakartha to be present at Poojamandira in Prakara by 6:45pm for sankalpa. Prasada to be collected in counter no 10.',
-      icon: GiFireBowl
-    }
-  ];
+  // Show loading state AFTER all hooks
+  if (loading) {
+    return (
+      <div className="booking-page">
+        <div className="container" style={{ textAlign: 'center', padding: '4rem 0' }}>
+          <h2>Loading...</h2>
+          <p>Please wait while we fetch available rooms and halls.</p>
+        </div>
+      </div>
+    );
+  }
 
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -197,7 +108,7 @@ function Booking() {
     });
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     
     // Ensure selectedDate exists and has all required properties
@@ -216,56 +127,40 @@ function Booking() {
       email: formData.email,
       phone: formData.phone,
       guests: formData.guests,
-      specialRequests: formData.specialRequests,
-      type: bookingType === 'rooms' ? 'Room' : bookingType === 'seva' ? 'Seva' : 'Marriage Hall',
+      special_requests: formData.specialRequests, // snake_case for database
+      type: bookingType === 'rooms' ? 'Room' : 'Marriage Hall',
       date: formattedDate, // Use DD/MM/YYYY format
       status: 'Pending',
       amount: bookingType === 'rooms' 
         ? `₹${selectedRoom.type?.price || selectedRoom.price}` 
-        : bookingType === 'seva'
-        ? `₹${selectedSeva.price}`
         : `₹${selectedRoom.price.toLocaleString()}`,
       // Add specific details based on booking type
       ...(bookingType === 'rooms' && {
-        roomName: selectedRoom.name,
-        roomType: selectedRoom.type?.name || 'Standard',
-        roomNumber: Math.floor(Math.random() * 100) + 101
-      }),
-      ...(bookingType === 'seva' && {
-        sevaName: selectedSeva.name,
-        sevaType: selectedSeva.name,
-        sevaTime: selectedSeva.time
+        room_name: selectedRoom.name,
+        room_type: selectedRoom.type?.name || 'Standard',
+        room_number: Math.floor(Math.random() * 100) + 101
       }),
       ...(bookingType === 'marriage' && {
-        hallName: selectedRoom.name,
+        hall_name: selectedRoom.name,
         capacity: selectedRoom.capacity,
-        eventType: 'Marriage Ceremony',
+        event_type: 'Marriage Ceremony',
         amenities: selectedRoom.amenities
       })
     };
     
-    addBooking(bookingData);
-    setConfirmedBooking(bookingData);
-    setBookingStep('confirmation');
+    try {
+      const result = await addBooking(bookingData);
+      setConfirmedBooking(result || bookingData);
+      setBookingStep('confirmation');
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      alert('Failed to create booking. Please try again.');
+    }
   };
 
   const handleServiceSelect = (service) => {
     setBookingType(service);
-    if (service === 'seva') {
-      setBookingStep('seva-selection');
-    } else {
-      setBookingStep('calendar');
-    }
-  };
-
-  const handleSevaSelect = (seva) => {
-    setSelectedSeva(seva);
     setBookingStep('calendar');
-  };
-
-  const handleBackToSevaSelection = () => {
-    setSelectedSeva(null);
-    setBookingStep('seva-selection');
   };
 
   const handleBackToCalendar = () => {
@@ -283,7 +178,6 @@ function Booking() {
     setBookingType('rooms');
     setSelectedDate(null);
     setSelectedRoom(null);
-    setSelectedSeva(null);
     setConfirmedBooking(null);
     setBookingStep('service-selection');
   };
@@ -305,13 +199,6 @@ function Booking() {
               >
                 <div className="service-icon"><FaHome /></div>
                 <h3>ROOM BOOKING</h3>
-              </div>
-              <div 
-                className="service-selection-card"
-                onClick={() => handleServiceSelect('seva')}
-              >
-                <div className="service-icon"><GiTempleGate /></div>
-                <h3>SEVA BOOKING</h3>
               </div>
               <a 
                 href="/services"
@@ -339,40 +226,12 @@ function Booking() {
         </section>
       )}
 
-      {bookingStep === 'seva-selection' && (
-        <section className="seva-selection-section">
-          <div className="container">
-            <div className="calendar-header-with-back">
-              <button className="btn-back" onClick={handleBackToServices}>
-                ← Back to Services
-              </button>
-              <h2 className="section-heading">SELECT SEVA</h2>
-            </div>
-            <div className="seva-grid">
-              {sevaList.map((seva) => (
-                <div 
-                  key={seva.id} 
-                  className="seva-card"
-                  onClick={() => handleSevaSelect(seva)}
-                >
-                  <div className="seva-icon"><seva.icon /></div>
-                  <h3 className="seva-name">{seva.name}</h3>
-                  <p className="seva-price">Rs. {seva.price}/-</p>
-                  <p className="seva-time">Seva Sankalpa : {seva.time}</p>
-                  <p className="seva-description">{seva.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {bookingStep === 'calendar' && (
         <section className="calendar-section">
           <div className="container">
             <div className="calendar-header-with-back">
-              <button className="btn-back" onClick={bookingType === 'seva' ? handleBackToSevaSelection : handleBackToServices}>
-                ← Back to {bookingType === 'seva' ? 'Seva Selection' : 'Services'}
+              <button className="btn-back" onClick={handleBackToServices}>
+                ← Back to Services
               </button>
               <div className="calendar-header">
                 <div className="calendar-controls">
@@ -441,7 +300,7 @@ function Booking() {
                 </h2>
                 
                 <div className="room-types">
-                  {room.types && Array.isArray(room.types) ? room.types.map((type, index) => (
+                  {room.types && Array.isArray(room.types) && room.types.length > 0 ? room.types.map((type, index) => (
                     <div key={index} className="room-type-card">
                       <p className="room-type-name">{type.name}</p>
                       <p className="room-price">₹ {type.price}/-</p>
@@ -458,42 +317,20 @@ function Booking() {
                       </button>
                     </div>
                   )) : (
-                    <p>No room types available</p>
+                    <p>No room types available for this room</p>
                   )}
                 </div>
               </div>
             </div>
           )) : (
-            <p>No rooms available</p>
+            <div style={{ textAlign: 'center', padding: '3rem', background: '#f9f9f9', borderRadius: '8px', margin: '2rem 0' }}>
+              <h3>No Rooms Available</h3>
+              <p>Please contact the admin to add rooms to the system.</p>
+              <p style={{ marginTop: '1rem', color: '#666' }}>
+                Admin can add rooms from the admin panel at <a href="/admin/login">/admin/login</a>
+              </p>
+            </div>
           )}
-          </div>
-        </section>
-      )}
-
-      {bookingStep === 'availability' && bookingType === 'seva' && (
-        <section className="section">
-          <div className="container">
-            <div className="selected-date-header">
-              <h2 className="availability-title">
-                Confirm Seva Booking for {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}
-              </h2>
-              <button className="btn-change-date" onClick={handleBackToCalendar}>
-                Change Date
-              </button>
-            </div>
-            <div className="seva-confirmation-card">
-              <div className="seva-icon-large"><selectedSeva.icon /></div>
-              <h2 className="seva-name">{selectedSeva.name}</h2>
-              <p className="seva-price">Rs. {selectedSeva.price}/-</p>
-              <p className="seva-time">Seva Sankalpa : {selectedSeva.time}</p>
-              <p className="seva-description">{selectedSeva.description}</p>
-              <button 
-                className="btn book-seva-btn" 
-                onClick={() => handleBookNow(selectedSeva)}
-              >
-                Proceed to Book
-              </button>
-            </div>
           </div>
         </section>
       )}
@@ -509,7 +346,7 @@ function Booking() {
                 Change Date
               </button>
             </div>
-            {marriageHalls.map(hall => (
+            {marriageHalls && marriageHalls.length > 0 ? marriageHalls.map(hall => (
               <div key={hall.id} className="room-card">
                 <div className="room-image">
                   <img src={hall.image} alt={hall.name} />
@@ -538,7 +375,15 @@ function Booking() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div style={{ textAlign: 'center', padding: '3rem', background: '#f9f9f9', borderRadius: '8px', margin: '2rem 0' }}>
+                <h3>No Marriage Halls Available</h3>
+                <p>Please contact the admin to add marriage halls to the system.</p>
+                <p style={{ marginTop: '1rem', color: '#666' }}>
+                  Admin can add halls from the admin panel at <a href="/admin/login">/admin/login</a>
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -557,27 +402,17 @@ function Booking() {
               <div className="booking-summary">
                 <h3>Booking Summary</h3>
                 <p><strong>Date:</strong> {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}</p>
-                {bookingType === 'seva' ? (
+                <p><strong>{bookingType === 'rooms' ? 'Room' : 'Hall'}:</strong> {selectedRoom.name}</p>
+                {bookingType === 'rooms' && selectedRoom.type && (
                   <>
-                    <p><strong>Seva:</strong> {selectedSeva.name}</p>
-                    <p><strong>Time:</strong> {selectedSeva.time}</p>
-                    <p><strong>Price:</strong> ₹{selectedSeva.price}/-</p>
+                    <p><strong>Type:</strong> {selectedRoom.type.name}</p>
+                    <p><strong>Price:</strong> ₹{selectedRoom.type.price}/-</p>
                   </>
-                ) : (
+                )}
+                {bookingType === 'marriage' && (
                   <>
-                    <p><strong>{bookingType === 'rooms' ? 'Room' : 'Hall'}:</strong> {selectedRoom.name}</p>
-                    {bookingType === 'rooms' && selectedRoom.type && (
-                      <>
-                        <p><strong>Type:</strong> {selectedRoom.type.name}</p>
-                        <p><strong>Price:</strong> ₹{selectedRoom.type.price}/-</p>
-                      </>
-                    )}
-                    {bookingType === 'marriage' && (
-                      <>
-                        <p><strong>Capacity:</strong> {selectedRoom.capacity}</p>
-                        <p><strong>Price:</strong> ₹{selectedRoom.price.toLocaleString()}/-</p>
-                      </>
-                    )}
+                    <p><strong>Capacity:</strong> {selectedRoom.capacity}</p>
+                    <p><strong>Price:</strong> ₹{selectedRoom.price.toLocaleString()}/-</p>
                   </>
                 )}
               </div>
@@ -665,17 +500,8 @@ function Booking() {
                 <h3>Booking Details</h3>
                 <p><strong>Name:</strong> {formData.name}</p>
                 <p><strong>Date:</strong> {selectedDate.date.toString().padStart(2, '0')}/{(monthNames.indexOf(selectedDate.month) + 1).toString().padStart(2, '0')}/{selectedDate.year}</p>
-                {bookingType === 'seva' ? (
-                  <>
-                    <p><strong>Seva:</strong> {selectedSeva.name}</p>
-                    <p><strong>Time:</strong> {selectedSeva.time}</p>
-                  </>
-                ) : (
-                  <>
-                    <p><strong>{bookingType === 'rooms' ? 'Room' : 'Hall'}:</strong> {selectedRoom.name}</p>
-                    <p><strong>Guests:</strong> {formData.guests}</p>
-                  </>
-                )}
+                <p><strong>{bookingType === 'rooms' ? 'Room' : 'Hall'}:</strong> {selectedRoom.name}</p>
+                <p><strong>Guests:</strong> {formData.guests}</p>
                 <p><strong>Booking ID:</strong> #{Math.random().toString(36).substring(2, 9).toUpperCase()}</p>
               </div>
 

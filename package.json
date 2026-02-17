@@ -1,8 +1,9 @@
 {
-  "name": "srsmatha-website",
+  "name": "temple-management-system",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",

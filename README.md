@@ -1,6 +1,6 @@
 # Spiritual Matha Website
 
-A React-based website inspired by religious/spiritual organization websites, featuring room booking, seva services, gallery, and contact functionality with a comprehensive admin dashboard.
+A React-based website inspired by religious/spiritual organization websites, featuring room booking, seva services, gallery, and contact functionality with a comprehensive admin dashboard. Now powered by Supabase for cloud database storage.
 
 ## Features
 
@@ -22,6 +22,24 @@ A React-based website inspired by religious/spiritual organization websites, fea
 - **User Management**: Manage user accounts and permissions
 - **Settings**: Configure website settings and preferences
 
+## Database
+
+This application uses **Supabase** as its backend database, replacing the previous localStorage implementation. This provides:
+- Persistent cloud storage
+- Multi-user data sharing
+- Real-time capabilities
+- Scalable PostgreSQL database
+- Built-in security with Row Level Security (RLS)
+
+### Quick Setup
+
+1. **Create Supabase Project**: Visit [supabase.com](https://supabase.com) and create a free account
+2. **Run Database Schema**: Execute `supabase-schema.sql` in Supabase SQL Editor
+3. **Configure Environment**: Create `.env` file with your Supabase credentials
+4. **Start Application**: Run `npm install` and `npm start`
+
+For detailed setup instructions, see [QUICK_START_SUPABASE.md](QUICK_START_SUPABASE.md) or [SUPABASE_SETUP.md](SUPABASE_SETUP.md)
+
 ## Admin Access
 
 Access the admin panel at: [http://localhost:3000/admin](http://localhost:3000/admin)
@@ -34,17 +52,32 @@ For more details about admin features, see [README_ADMIN.md](README_ADMIN.md)
 
 ## Installation
 
-1. Install dependencies:
+1. **Clone the repository**
+
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-2. Start the development server:
+3. **Set up Supabase:**
+   - Create a Supabase project at [supabase.com](https://supabase.com)
+   - Run the SQL schema from `supabase-schema.sql`
+   - Get your API credentials from Settings > API
+
+4. **Configure environment variables:**
+   - Copy `.env.example` to `.env`
+   - Add your Supabase URL and anon key:
+   ```
+   REACT_APP_SUPABASE_URL=your-supabase-url
+   REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+5. **Start the development server:**
 ```bash
 npm start
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. **Open [http://localhost:3000](http://localhost:3000) in your browser**
 
 ## Build for Production
 
@@ -74,12 +107,14 @@ Tested on devices from 320px to 1920px+ width.
 - Add Google Maps integration
 - Configure admin credentials in production
 - Update admin dashboard statistics with real data
+- Customize Supabase database schema as needed
 
 ## Technologies Used
 
 - React 18
 - React Router DOM 6
 - React Context API (for state management)
+- Supabase (Backend & Database)
 - CSS3 with Grid and Flexbox
 - Responsive Design (Mobile-First Approach)
 - Modern JavaScript (ES6+)

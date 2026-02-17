@@ -6,10 +6,7 @@ import './AdminManage.css';
 
 function ManageHalls() {
   const { marriageHalls, setMarriageHalls, bookings } = useData();
-  const [halls, setHalls] = useState([
-    { id: 1, name: 'Kalyana Mandapa - Main Hall', capacity: '500 Guests', price: 25000, amenities: 'AC, Stage, Dining, Parking', bookings: 12 },
-    { id: 2, name: 'Kalyana Mandapa - Mini Hall', capacity: '200 Guests', price: 15000, amenities: 'AC, Stage, Dining', bookings: 8 }
-  ]);
+  const [halls, setHalls] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentHall, setCurrentHall] = useState(null);
@@ -21,6 +18,15 @@ function ManageHalls() {
     availableTime: '',
     imageUrl: ''
   });
+  
+  // Sync halls with marriageHalls from Supabase
+  React.useEffect(() => {
+    setHalls(marriageHalls.map(hall => ({
+      ...hall,
+      bookings: bookings.filter(b => b.type === 'Marriage Hall' && b.hallName === hall.name).length
+    })));
+  }, [marriageHalls, bookings]);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -45,64 +51,105 @@ function ManageHalls() {
     setShowEditModal(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this hall?')) {
-      setHalls(halls.filter(hall => hall.id !== id));
-      setMarriageHalls(marriageHalls.filter(hall => hall.id !== id));
-      alert('Hall deleted successfully!');
+      try {
+        const { supabase } = await import('../../supabaseClient');
+        
+        const { error } = await supabase
+          .from('marriage_halls')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        
+        setHalls(halls.filter(hall => hall.id !== id));
+        setMarriageHalls(marriageHalls.filter(hall => hall.id !== id));
+        alert('Hall deleted successfully from database!');
+      } catch (error) {
+        console.error('Error deleting hall:', error);
+        alert('Failed to delete hall: ' + error.message);
+      }
     }
   };
 
-  const handleSubmitAdd = (e) => {
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
-    const newHall = {
-      id: marriageHalls.length + 1,
-      name: formData.name,
-      image: formData.imageUrl || 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Hall',
-      imageUrl: formData.imageUrl,
-      capacity: formData.capacity,
-      amenities: formData.amenities,
-      availableTime: formData.availableTime,
-      price: parseInt(formData.price),
-      available: true,
-      bookings: 0
-    };
-    setMarriageHalls([...marriageHalls, newHall]);
-    setHalls([...halls, newHall]);
-    setShowAddModal(false);
-    alert('Hall added successfully and will appear on booking page!');
+    
+    try {
+      const { supabase } = await import('../../supabaseClient');
+      
+      const hallData = {
+        name: formData.name,
+        image: formData.imageUrl || 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Hall',
+        capacity: formData.capacity,
+        amenities: formData.amenities,
+        price: parseInt(formData.price),
+        available: true
+      };
+      
+      const { data, error } = await supabase
+        .from('marriage_halls')
+        .insert([hallData])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Update local state
+      setMarriageHalls([...marriageHalls, data]);
+      setHalls([...halls, { ...data, bookings: 0 }]);
+      
+      setShowAddModal(false);
+      alert('Hall added successfully and saved to database!');
+      window.location.reload(); // Refresh to show updated data
+    } catch (error) {
+      console.error('Error adding hall:', error);
+      alert('Failed to add hall: ' + error.message);
+    }
   };
 
-  const handleSubmitEdit = (e) => {
+  const handleSubmitEdit = async (e) => {
     e.preventDefault();
-    const updatedHalls = halls.map(hall => 
-      hall.id === currentHall.id 
-        ? { 
-            ...hall, 
-            ...formData, 
-            price: parseInt(formData.price),
-            image: formData.imageUrl || hall.image,
-            imageUrl: formData.imageUrl
-          }
-        : hall
-    );
-    setHalls(updatedHalls);
-    setMarriageHalls(marriageHalls.map(hall => 
-      hall.id === currentHall.id 
-        ? { 
-            ...hall, 
-            name: formData.name, 
-            capacity: formData.capacity, 
-            amenities: formData.amenities, 
-            availableTime: formData.availableTime,
-            price: parseInt(formData.price),
-            image: formData.imageUrl || hall.image,
-            imageUrl: formData.imageUrl
-          }
-        : hall
-    ));
-    setShowEditModal(false);
-    alert('Hall updated successfully!');
+    
+    try {
+      const { supabase } = await import('../../supabaseClient');
+      
+      const hallData = {
+        name: formData.name,
+        capacity: formData.capacity,
+        amenities: formData.amenities,
+        price: parseInt(formData.price),
+        image: formData.imageUrl || currentHall.image
+      };
+      
+      const { error } = await supabase
+        .from('marriage_halls')
+        .update(hallData)
+        .eq('id', currentHall.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      const updatedHalls = halls.map(hall => 
+        hall.id === currentHall.id 
+          ? { ...hall, ...formData, price: parseInt(formData.price), image: formData.imageUrl || hall.image }
+          : hall
+      );
+      setHalls(updatedHalls);
+      setMarriageHalls(marriageHalls.map(hall => 
+        hall.id === currentHall.id 
+          ? { ...hall, ...hallData }
+          : hall
+      ));
+      
+      setShowEditModal(false);
+      alert('Hall updated successfully in database!');
+      window.location.reload(); // Refresh to show updated data
+    } catch (error) {
+      console.error('Error updating hall:', error);
+      alert('Failed to update hall: ' + error.message);
+    }
   };
 
   const handleChange = (e) => {

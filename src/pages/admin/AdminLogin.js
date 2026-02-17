@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseClient';
 import './AdminLogin.css';
 
 function AdminLogin() {
@@ -7,6 +8,7 @@ function AdminLogin() {
     username: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -16,14 +18,33 @@ function AdminLogin() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simple authentication (in production, use proper backend authentication)
-    if (credentials.username === 'admin' && credentials.password === 'admin123') {
+    setLoading(true);
+
+    try {
+      // Query admin_users table
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('username', credentials.username)
+        .eq('password_hash', credentials.password)
+        .single();
+
+      if (error || !data) {
+        alert('Invalid credentials! Use username: admin, password: admin123');
+        setLoading(false);
+        return;
+      }
+
+      // Store admin session
       localStorage.setItem('adminLoggedIn', 'true');
+      localStorage.setItem('adminUser', JSON.stringify(data));
       navigate('/admin/dashboard');
-    } else {
-      alert('Invalid credentials! Use username: admin, password: admin123');
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login failed. Please try again.');
+      setLoading(false);
     }
   };
 
@@ -32,7 +53,7 @@ function AdminLogin() {
       <div className="login-container">
         <div className="login-header">
           <h1>Admin Login</h1>
-          <p>SRS Matha Mantralayam</p>
+          <p>Temple Management System</p>
         </div>
         
         <form className="login-form" onSubmit={handleSubmit}>
@@ -60,8 +81,8 @@ function AdminLogin() {
             />
           </div>
 
-          <button type="submit" className="btn-login">
-            Login
+          <button type="submit" className="btn-login" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 

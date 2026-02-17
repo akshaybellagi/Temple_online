@@ -7,7 +7,7 @@ function ManageContent() {
   const [content, setContent] = useState({
     about: 'Our matha has a rich spiritual heritage spanning many generations...',
     services: 'We offer various spiritual services including daily pooja, special sevas...',
-    contact: 'Email: info@srsmatha.org\nPhone: +91 XXXXXXXXXX'
+    contact: 'Email: info@example.org\nPhone: +91 XXXXXXXXXX'
   });
 
   const handleSave = () => {

@@ -34,7 +34,6 @@ function Receipt({ booking, onClose }) {
     }
     switch(booking.type) {
       case 'Room': return 'Room Booking';
-      case 'Seva': return 'Seva Booking';
       case 'Marriage Hall': return 'Marriage Hall Booking';
       default: return 'Booking';
     }
@@ -171,27 +170,6 @@ function Receipt({ booking, onClose }) {
                       <div className="receipt-detail-item">
                         <span className="detail-label">Check-in Date:</span>
                         <span className="detail-value">{booking.date}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {booking.type === 'Seva' && (
-                    <>
-                      <div className="receipt-detail-item">
-                        <span className="detail-label">Seva Name:</span>
-                        <span className="detail-value">{booking.sevaName}</span>
-                      </div>
-                      <div className="receipt-detail-item">
-                        <span className="detail-label">Seva Date:</span>
-                        <span className="detail-value">{booking.date}</span>
-                      </div>
-                      <div className="receipt-detail-item">
-                        <span className="detail-label">Seva Time:</span>
-                        <span className="detail-value">{booking.sevaTime}</span>
-                      </div>
-                      <div className="receipt-detail-item">
-                        <span className="detail-label">Sankalpa Location:</span>
-                        <span className="detail-value">Poojamandira in Prakara</span>
                       </div>
                     </>
                   )}
