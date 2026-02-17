@@ -5,22 +5,179 @@ A React-based website inspired by religious/spiritual organization websites, fea
 ## Features
 
 ### Public Features
-- **Home Page**: Hero section with featured services
-- **About Page**: History, mission, and spiritual lineage
-- **Services Page**: Daily pooja, special sevas, and e-services
-- **Booking Page**: Room and seva booking forms
-- **Gallery Page**: Filterable image gallery
-- **Contact Page**: Contact form and location information
-- **Responsive Design**: Fully mobile-responsive across all devices (320px - 1920px+)
+
+#### Home Page
+- Hero section with welcome message and call-to-action
+- Featured services showcase
+- Quick access to booking and donations
+- Latest news and announcements section
+- Responsive carousel/slider for highlights
+- Direct navigation to key sections
+
+#### About Page
+- Organization history and background
+- Mission and vision statements
+- Spiritual lineage and traditions
+- Leadership and management information
+- Values and principles
+- Photo gallery of the organization
+
+#### Services Page
+- **Daily Pooja Services**: Regular worship schedules and timings
+- **Special Sevas**: Festival-specific and special occasion services
+- **E-Services**: Online booking for various religious services
+- Service descriptions with pricing
+- Booking integration for each service
+- Service categories and filtering
+
+#### Booking Page
+- **Room Booking**: 
+  - Select check-in/check-out dates
+  - Choose room type (AC/Non-AC, Single/Double)
+  - Guest information form
+  - Special requirements field
+  - Real-time availability checking
+- **Hall Booking**:
+  - Event date and time selection
+  - Hall capacity and amenities
+  - Purpose of booking
+  - Contact details
+- **Seva Booking**:
+  - Choose seva type
+  - Select date and time slot
+  - Devotee information
+  - Special instructions
+- Form validation and confirmation
+- Receipt generation after booking
+
+#### Gallery Page
+- Filterable image gallery (All, Events, Temple, Activities)
+- Lightbox view for full-size images
+- Image categories and tags
+- Responsive grid layout
+- Lazy loading for performance
+- Upload date and descriptions
+
+#### Contact Page
+- Contact form with validation
+- Organization address and location
+- Phone numbers and email
+- Office hours
+- Google Maps integration (ready)
+- Social media links
+- Quick inquiry form
+
+#### Additional Pages
+- **Latest News**: Recent announcements and updates
+- **Live Status**: Real-time darshan and event status
+- **My History**: User's booking and donation history
+- **Panchanga**: Daily Hindu calendar and auspicious timings
+- **Rooms/Donor**: Room availability and donor information
+
+#### General Features
+- Fully responsive design (320px - 1920px+)
+- Mobile-first approach
+- Touch-friendly interface
+- Fast loading and optimized performance
+- Cross-browser compatibility
+- Accessibility features
 
 ### Admin Features
-- **Admin Dashboard**: Comprehensive management interface
-- **Booking Management**: View and manage room and hall bookings
-- **Donation Management**: Track and manage donations
-- **Gallery Management**: Upload and organize gallery images
-- **Content Management**: Update website content dynamically
-- **User Management**: Manage user accounts and permissions
-- **Settings**: Configure website settings and preferences
+
+#### Admin Dashboard
+- Overview statistics (bookings, donations, users)
+- Recent activity feed
+- Quick action buttons
+- Revenue and analytics charts
+- Pending approvals summary
+- System health status
+
+#### Manage Bookings
+- View all room, hall, and seva bookings
+- Filter by date, status, type
+- Approve/reject booking requests
+- Edit booking details
+- Cancel bookings with reasons
+- Export booking reports
+- Send confirmation emails
+- Check-in/check-out management
+
+#### Manage Donations
+- Track all donations
+- Donor information management
+- Payment status tracking
+- Generate donation receipts
+- Filter by amount, date, purpose
+- Export donation reports
+- Send thank you messages
+- Tax exemption certificate generation
+
+#### Manage Gallery
+- Upload multiple images
+- Add image descriptions and tags
+- Categorize images (Events, Temple, Activities)
+- Delete or archive images
+- Reorder gallery items
+- Bulk operations
+- Image optimization
+
+#### Manage Content
+- Edit home page content
+- Update about page information
+- Modify service descriptions
+- Change contact information
+- Update news and announcements
+- Manage featured content
+- SEO settings
+
+#### Manage Halls
+- Add/edit/delete halls
+- Set hall capacity and amenities
+- Configure pricing
+- Manage availability calendar
+- Upload hall images
+- Set booking rules
+
+#### Manage Rooms
+- Add/edit/delete rooms
+- Room types and categories
+- Pricing configuration
+- Availability management
+- Room amenities
+- Occupancy settings
+
+#### Manage Sevas
+- Add/edit/delete seva services
+- Set seva timings and schedules
+- Configure pricing
+- Manage seva categories
+- Set booking limits
+- Special requirements
+
+#### Manage Temples
+- Add multiple temple locations
+- Temple information and history
+- Deity details
+- Darshan timings
+- Festival calendar
+- Temple images and videos
+
+#### Manage Users
+- View all registered users
+- User role management (Admin, Staff, User)
+- Activate/deactivate accounts
+- Reset passwords
+- View user activity logs
+- Export user data
+
+#### Settings
+- General website settings
+- Email configuration
+- Payment gateway integration
+- Notification preferences
+- Backup and restore
+- Security settings
+- Theme customization
 
 ## Database
 
@@ -31,15 +188,6 @@ This application uses **Supabase** as its backend database, replacing the previo
 - Scalable PostgreSQL database
 - Built-in security with Row Level Security (RLS)
 
-### Quick Setup
-
-1. **Create Supabase Project**: Visit [supabase.com](https://supabase.com) and create a free account
-2. **Run Database Schema**: Execute `supabase-schema.sql` in Supabase SQL Editor
-3. **Configure Environment**: Create `.env` file with your Supabase credentials
-4. **Start Application**: Run `npm install` and `npm start`
-
-For detailed setup instructions, see [QUICK_START_SUPABASE.md](QUICK_START_SUPABASE.md) or [SUPABASE_SETUP.md](SUPABASE_SETUP.md)
-
 ## Admin Access
 
 Access the admin panel at: [http://localhost:3000/admin](http://localhost:3000/admin)
@@ -48,7 +196,7 @@ Access the admin panel at: [http://localhost:3000/admin](http://localhost:3000/a
 - Username: `admin`
 - Password: `admin123`
 
-For more details about admin features, see [README_ADMIN.md](README_ADMIN.md)
+**Important:** Change these credentials in production by updating the admin user in Supabase database.
 
 ## Installation
 
@@ -60,19 +208,20 @@ npm install
 ```
 
 3. **Set up Supabase:**
-   - Create a Supabase project at [supabase.com](https://supabase.com)
-   - Run the SQL schema from `supabase-schema.sql`
+   - Create a free account at [supabase.com](https://supabase.com)
+   - Create a new project
+   - Go to SQL Editor and run the schema from `supabase-schema.sql`
    - Get your API credentials from Settings > API
 
-4. **Configure environment variables:**
+4. **Configure environment:**
    - Copy `.env.example` to `.env`
-   - Add your Supabase URL and anon key:
+   - Add your Supabase credentials:
    ```
-   REACT_APP_SUPABASE_URL=your-supabase-url
-   REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+   REACT_APP_SUPABASE_URL=your-project-url
+   REACT_APP_SUPABASE_ANON_KEY=your-anon-key
    ```
 
-5. **Start the development server:**
+5. **Start the app:**
 ```bash
 npm start
 ```
