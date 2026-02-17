@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { GiTempleGate, GiPrayer } from 'react-icons/gi';
-import { FaHome, FaDonate, FaChurch, FaBuilding, FaTv, FaNewspaper, FaBook, FaLaptop, FaUsers, FaStar, FaCalendarAlt } from 'react-icons/fa';
+import { FaHome, FaDonate, FaChurch, FaTv, FaLaptop, FaUsers, FaStar, FaCalendarAlt } from 'react-icons/fa';
 import { MdRestaurant } from 'react-icons/md';
 import { GiCow, GiMusicalNotes } from 'react-icons/gi';
 import { IoLibrary } from 'react-icons/io5';
