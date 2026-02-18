@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { apiClient } from '../apiClient';
 
 const DataContext = createContext();
 
@@ -28,13 +28,7 @@ export const DataProvider = ({ children }) => {
   // Fetch rooms
   const fetchRooms = async () => {
     try {
-      const { data: roomsData, error: roomsError } = await supabase
-        .from('rooms')
-        .select('*')
-        .order('name', { ascending: true })
-        .order('id', { ascending: true });
-
-      if (roomsError) throw roomsError;
+      const roomsData = await apiClient.getRooms();
 
       // Group rooms by name and create types array
       const roomsMap = {};
@@ -68,7 +62,6 @@ export const DataProvider = ({ children }) => {
       setRooms(roomsWithTypes);
     } catch (error) {
       console.error('Error fetching rooms:', error);
-      // Set empty array on error so UI doesn't break
       setRooms([]);
     }
   };
@@ -76,12 +69,7 @@ export const DataProvider = ({ children }) => {
   // Fetch marriage halls
   const fetchMarriageHalls = async () => {
     try {
-      const { data, error } = await supabase
-        .from('marriage_halls')
-        .select('*')
-        .order('id');
-
-      if (error) throw error;
+      const data = await apiClient.getMarriageHalls();
       setMarriageHalls(data);
     } catch (error) {
       console.error('Error fetching marriage halls:', error);
@@ -91,12 +79,7 @@ export const DataProvider = ({ children }) => {
   // Fetch bookings
   const fetchBookings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await apiClient.getBookings();
       setBookings(data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -106,12 +89,7 @@ export const DataProvider = ({ children }) => {
   // Fetch donations
   const fetchDonations = async () => {
     try {
-      const { data, error } = await supabase
-        .from('donations')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await apiClient.getDonations();
       setDonations(data);
     } catch (error) {
       console.error('Error fetching donations:', error);
@@ -121,12 +99,7 @@ export const DataProvider = ({ children }) => {
   // Fetch gallery images
   const fetchGalleryImages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('gallery_images')
-        .select('*')
-        .order('id');
-
-      if (error) throw error;
+      const data = await apiClient.getGalleryImages();
       setGalleryImages(data);
     } catch (error) {
       console.error('Error fetching gallery images:', error);
@@ -136,11 +109,7 @@ export const DataProvider = ({ children }) => {
   // Fetch site content
   const fetchSiteContent = async () => {
     try {
-      const { data, error } = await supabase
-        .from('site_content')
-        .select('*');
-
-      if (error) throw error;
+      const data = await apiClient.getSiteContent();
 
       const contentObj = {};
       data.forEach(item => {
@@ -155,12 +124,7 @@ export const DataProvider = ({ children }) => {
   // Fetch temples
   const fetchTemples = async () => {
     try {
-      const { data, error } = await supabase
-        .from('temples')
-        .select('*')
-        .order('id');
-
-      if (error) throw error;
+      const data = await apiClient.getTemples();
       setTemples(data || []);
     } catch (error) {
       console.error('Error fetching temples:', error);
@@ -190,14 +154,7 @@ export const DataProvider = ({ children }) => {
   // Add booking function
   const addBooking = async (booking) => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert([booking])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.createBooking(booking);
       setBookings([data, ...bookings]);
       return data;
     } catch (error) {
@@ -209,15 +166,7 @@ export const DataProvider = ({ children }) => {
   // Update booking function
   const updateBooking = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateBooking(id, updates);
       setBookings(bookings.map(b => b.id === id ? data : b));
       return data;
     } catch (error) {
@@ -229,13 +178,7 @@ export const DataProvider = ({ children }) => {
   // Delete booking function
   const deleteBooking = async (id) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await apiClient.deleteBooking(id);
       setBookings(bookings.filter(b => b.id !== id));
     } catch (error) {
       console.error('Error deleting booking:', error);
@@ -255,14 +198,7 @@ export const DataProvider = ({ children }) => {
         status: 'Completed'
       };
 
-      const { data, error } = await supabase
-        .from('donations')
-        .insert([donationData])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.createDonation(donationData);
       setDonations([data, ...donations]);
       return data;
     } catch (error) {
@@ -274,15 +210,7 @@ export const DataProvider = ({ children }) => {
   // Update donation function
   const updateDonation = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('donations')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateDonation(id, updates);
       setDonations(donations.map(d => d.id === id ? data : d));
       return data;
     } catch (error) {
@@ -294,13 +222,7 @@ export const DataProvider = ({ children }) => {
   // Delete donation function
   const deleteDonation = async (id) => {
     try {
-      const { error } = await supabase
-        .from('donations')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await apiClient.deleteDonation(id);
       setDonations(donations.filter(d => d.id !== id));
     } catch (error) {
       console.error('Error deleting donation:', error);
@@ -311,15 +233,7 @@ export const DataProvider = ({ children }) => {
   // Update room function
   const updateRoom = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('rooms')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateRoom(id, updates);
       await fetchRooms(); // Refresh rooms data
       return data;
     } catch (error) {
@@ -331,15 +245,7 @@ export const DataProvider = ({ children }) => {
   // Update room type function (now updates the room directly)
   const updateRoomType = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('rooms')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateRoom(id, updates);
       await fetchRooms(); // Refresh rooms data
       return data;
     } catch (error) {
@@ -351,15 +257,7 @@ export const DataProvider = ({ children }) => {
   // Update marriage hall function
   const updateMarriageHall = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('marriage_halls')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateMarriageHall(id, updates);
       setMarriageHalls(marriageHalls.map(h => h.id === id ? data : h));
       return data;
     } catch (error) {
@@ -371,14 +269,7 @@ export const DataProvider = ({ children }) => {
   // Add gallery image function
   const addGalleryImage = async (image) => {
     try {
-      const { data, error } = await supabase
-        .from('gallery_images')
-        .insert([image])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.createGalleryImage(image);
       setGalleryImages([...galleryImages, data]);
       return data;
     } catch (error) {
@@ -390,15 +281,7 @@ export const DataProvider = ({ children }) => {
   // Update gallery image function
   const updateGalleryImage = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('gallery_images')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateGalleryImage(id, updates);
       setGalleryImages(galleryImages.map(img => img.id === id ? data : img));
       return data;
     } catch (error) {
@@ -410,13 +293,7 @@ export const DataProvider = ({ children }) => {
   // Delete gallery image function
   const deleteGalleryImage = async (id) => {
     try {
-      const { error } = await supabase
-        .from('gallery_images')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await apiClient.deleteGalleryImage(id);
       setGalleryImages(galleryImages.filter(img => img.id !== id));
     } catch (error) {
       console.error('Error deleting gallery image:', error);
@@ -427,14 +304,7 @@ export const DataProvider = ({ children }) => {
   // Update site content function
   const updateSiteContent = async (key, value) => {
     try {
-      const { data, error } = await supabase
-        .from('site_content')
-        .upsert({ key, value })
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.upsertSiteContent(key, value);
       setSiteContent({ ...siteContent, [key]: value });
       return data;
     } catch (error) {
@@ -446,14 +316,7 @@ export const DataProvider = ({ children }) => {
   // Add temple function
   const addTemple = async (temple) => {
     try {
-      const { data, error } = await supabase
-        .from('temples')
-        .insert([temple])
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.createTemple(temple);
       setTemples([...temples, data]);
       return data;
     } catch (error) {
@@ -465,15 +328,7 @@ export const DataProvider = ({ children }) => {
   // Update temple function
   const updateTemple = async (id, updates) => {
     try {
-      const { data, error } = await supabase
-        .from('temples')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await apiClient.updateTemple(id, updates);
       setTemples(temples.map(t => t.id === id ? data : t));
       return data;
     } catch (error) {
@@ -485,13 +340,7 @@ export const DataProvider = ({ children }) => {
   // Delete temple function
   const deleteTemple = async (id) => {
     try {
-      const { error } = await supabase
-        .from('temples')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await apiClient.deleteTemple(id);
       setTemples(temples.filter(t => t.id !== id));
     } catch (error) {
       console.error('Error deleting temple:', error);

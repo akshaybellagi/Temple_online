@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../supabaseClient';
+import { apiClient } from '../../apiClient';
 import './AdminLogin.css';
 
 function AdminLogin() {
@@ -23,15 +23,10 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      // Query admin_users table
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('username', credentials.username)
-        .eq('password_hash', credentials.password)
-        .single();
+      // Call admin login API
+      const data = await apiClient.adminLogin(credentials.username, credentials.password);
 
-      if (error || !data) {
+      if (!data.success) {
         alert('Invalid credentials! Use username: admin, password: admin123');
         setLoading(false);
         return;
@@ -39,7 +34,7 @@ function AdminLogin() {
 
       // Store admin session
       localStorage.setItem('adminLoggedIn', 'true');
-      localStorage.setItem('adminUser', JSON.stringify(data));
+      localStorage.setItem('adminUser', JSON.stringify(data.user));
       navigate('/admin/dashboard');
     } catch (error) {
       console.error('Login error:', error);

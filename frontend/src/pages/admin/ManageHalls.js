@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
+import { apiClient } from '../../apiClient';
 import Receipt from '../../components/Receipt';
 import './AdminManage.css';
 
@@ -54,15 +55,7 @@ function ManageHalls() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this hall?')) {
       try {
-        const { supabase } = await import('../../supabaseClient');
-        
-        const { error } = await supabase
-          .from('marriage_halls')
-          .delete()
-          .eq('id', id);
-        
-        if (error) throw error;
-        
+        await apiClient.deleteMarriageHall(id);
         setHalls(halls.filter(hall => hall.id !== id));
         setMarriageHalls(marriageHalls.filter(hall => hall.id !== id));
         alert('Hall deleted successfully from database!');
@@ -77,8 +70,6 @@ function ManageHalls() {
     e.preventDefault();
     
     try {
-      const { supabase } = await import('../../supabaseClient');
-      
       const hallData = {
         name: formData.name,
         image: formData.imageUrl || 'https://via.placeholder.com/300x200/e74c3c/ffffff?text=Hall',
@@ -88,13 +79,7 @@ function ManageHalls() {
         available: true
       };
       
-      const { data, error } = await supabase
-        .from('marriage_halls')
-        .insert([hallData])
-        .select()
-        .single();
-      
-      if (error) throw error;
+      const data = await apiClient.createMarriageHall(hallData);
       
       // Update local state
       setMarriageHalls([...marriageHalls, data]);
@@ -113,8 +98,6 @@ function ManageHalls() {
     e.preventDefault();
     
     try {
-      const { supabase } = await import('../../supabaseClient');
-      
       const hallData = {
         name: formData.name,
         capacity: formData.capacity,
@@ -123,12 +106,7 @@ function ManageHalls() {
         image: formData.imageUrl || currentHall.image
       };
       
-      const { error } = await supabase
-        .from('marriage_halls')
-        .update(hallData)
-        .eq('id', currentHall.id);
-      
-      if (error) throw error;
+      await apiClient.updateMarriageHall(currentHall.id, hallData);
       
       // Update local state
       const updatedHalls = halls.map(hall => 

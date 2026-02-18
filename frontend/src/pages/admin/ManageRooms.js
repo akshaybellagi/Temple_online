@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
-import { supabase } from '../../supabaseClient';
+import { apiClient } from '../../apiClient';
 import Receipt from '../../components/Receipt';
 import './AdminManage.css';
 
@@ -92,13 +92,7 @@ function ManageRooms() {
     }
 
     try {
-      const { error } = await supabase
-        .from('rooms')
-        .delete()
-        .eq('id', roomId);
-
-      if (error) throw error;
-
+      await apiClient.deleteRoom(roomId);
       await refreshData();
       alert('Room deleted successfully!');
     } catch (error) {
@@ -125,12 +119,7 @@ function ManageRooms() {
         image: 'https://via.placeholder.com/300x200/3498db/ffffff?text=Room'
       };
 
-      const { error } = await supabase
-        .from('rooms')
-        .insert([roomData]);
-
-      if (error) throw error;
-
+      await apiClient.createRoom(roomData);
       await refreshData();
       setShowAddModal(false);
       setFormData({ 
@@ -155,24 +144,20 @@ function ManageRooms() {
     e.preventDefault();
 
     try {
-      const { error } = await supabase
-        .from('rooms')
-        .update({
-          name: formData.name,
-          type: formData.type,
-          price: parseInt(formData.price),
-          total: parseInt(formData.total),
-          available: parseInt(formData.total),
-          lift: formData.lift,
-          floor: formData.floor,
-          occupancy: formData.occupancy,
-          commode_type: formData.commode_type,
-          ac: formData.ac
-        })
-        .eq('id', currentRoomType.id);
+      const updates = {
+        name: formData.name,
+        type: formData.type,
+        price: parseInt(formData.price),
+        total: parseInt(formData.total),
+        available: parseInt(formData.total),
+        lift: formData.lift,
+        floor: formData.floor,
+        occupancy: formData.occupancy,
+        commode_type: formData.commode_type,
+        ac: formData.ac
+      };
 
-      if (error) throw error;
-
+      await apiClient.updateRoom(currentRoomType.id, updates);
       await refreshData();
       setShowEditModal(false);
       alert('Room updated successfully!');
@@ -216,13 +201,7 @@ function ManageRooms() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: newStatus })
-        .eq('id', bookingId);
-
-      if (error) throw error;
-
+      await apiClient.updateBooking(bookingId, { status: newStatus });
       await refreshData();
       setShowBookingModal(false);
       alert(`Booking status updated to ${newStatus}!`);
