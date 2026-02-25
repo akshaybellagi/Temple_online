@@ -46,6 +46,18 @@ router.post('/', async (req, res) => {
       isActive: true
     };
 
+    // Handle timings - convert string to object if needed
+    if (templeData.timings && typeof templeData.timings === 'string') {
+      // If timings is a string like "6:00 AM - 12:00 PM | 4:00 PM - 9:00 PM"
+      const timingParts = templeData.timings.split('|').map(t => t.trim());
+      if (timingParts.length === 2) {
+        templeData.timings = {
+          morning: timingParts[0],
+          evening: timingParts[1]
+        };
+      }
+    }
+
     const docRef = await db.collection('temples').add(templeData);
     
     res.status(201).json({
@@ -66,6 +78,18 @@ router.put('/:id', async (req, res) => {
       ...req.body,
       updatedAt: new Date()
     };
+
+    // Handle timings - convert string to object if needed
+    if (updateData.timings && typeof updateData.timings === 'string') {
+      // If timings is a string like "6:00 AM - 12:00 PM | 4:00 PM - 9:00 PM"
+      const timingParts = updateData.timings.split('|').map(t => t.trim());
+      if (timingParts.length === 2) {
+        updateData.timings = {
+          morning: timingParts[0],
+          evening: timingParts[1]
+        };
+      }
+    }
 
     await db.collection('temples').doc(id).update(updateData);
     

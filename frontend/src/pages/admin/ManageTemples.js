@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
+import { formatTimings } from '../../utils/formatters';
 import { GiTempleGate } from 'react-icons/gi';
 import './AdminManage.css';
 
@@ -51,7 +52,7 @@ function ManageTemples() {
       description: temple.description || '',
       image: temple.image || '',
       contact: temple.contact || '',
-      timings: temple.timings || ''
+      timings: formatTimings(temple.timings)
     });
     setShowEditModal(true);
   };
@@ -127,7 +128,9 @@ function ManageTemples() {
                     <td>{temple.name}</td>
                     <td>{temple.location}</td>
                     <td>{temple.contact || 'N/A'}</td>
-                    <td>{temple.timings || 'N/A'}</td>
+                    <td>
+                      {formatTimings(temple.timings)}
+                    </td>
                     <td>
                       <button className="btn-action btn-edit" onClick={() => handleEdit(temple)}>Edit</button>
                       <button className="btn-action btn-delete" onClick={() => handleDelete(temple.id)}>Delete</button>
