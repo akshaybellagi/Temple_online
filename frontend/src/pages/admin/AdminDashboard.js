@@ -10,11 +10,17 @@ function AdminDashboard() {
   const { bookings, donations } = useData();
 
   useEffect(() => {
+    console.log('AdminDashboard mounted');
     const isLoggedIn = localStorage.getItem('adminLoggedIn');
+    console.log('Admin logged in status:', isLoggedIn);
+    
     if (!isLoggedIn) {
+      console.log('Not logged in, redirecting to login');
       navigate('/admin/login');
     }
   }, [navigate]);
+
+  console.log('AdminDashboard rendering, bookings:', bookings.length, 'donations:', donations.length);
 
   const handleLogout = () => {
     localStorage.removeItem('adminLoggedIn');

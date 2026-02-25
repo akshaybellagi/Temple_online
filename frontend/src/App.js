@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
+import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -24,55 +25,141 @@ import ManageGallery from './pages/admin/ManageGallery';
 import ManageContent from './pages/admin/ManageContent';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageTemples from './pages/admin/ManageTemples';
+import ManageSevas from './pages/admin/ManageSevas';
 import Settings from './pages/admin/Settings';
-import './App.css';
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
-    <DataProvider>
-      <Router>
-        <div className="App">
-        <Routes>
-          {/* Admin Routes */}
-          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/bookings" element={<ManageBookings />} />
-          <Route path="/admin/rooms" element={<ManageRooms />} />
-          <Route path="/admin/halls" element={<ManageHalls />} />
-          <Route path="/admin/donations" element={<ManageDonations />} />
-          <Route path="/admin/gallery" element={<ManageGallery />} />
-          <Route path="/admin/content" element={<ManageContent />} />
-          <Route path="/admin/users" element={<ManageUsers />} />
-          <Route path="/admin/temples" element={<ManageTemples />} />
-          <Route path="/admin/settings" element={<Settings />} />
-          
-          {/* Public Routes */}
-          <Route path="/*" element={
-            <>
-              <Header />
-              <main>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/booking" element={<Booking />} />
-                  <Route path="/gallery" element={<Gallery />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/latest-news" element={<LatestNews />} />
-                  <Route path="/live-status" element={<LiveStatus />} />
-                  <Route path="/rooms-donor" element={<RoomsDonor />} />
-                  <Route path="/my-history" element={<MyHistory />} />
-                  <Route path="/panchanga" element={<Panchanga />} />
-                </Routes>
-              </main>
-              <Footer />
-            </>
-          } />
-        </Routes>
-        </div>
-      </Router>
-    </DataProvider>
+    <AuthProvider>
+      <DataProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <div className="App">
+          <Routes>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+            <Route path="/admin/bookings" element={<ManageBookings />} />
+            <Route path="/admin/rooms" element={<ManageRooms />} />
+            <Route path="/admin/halls" element={<ManageHalls />} />
+            <Route path="/admin/donations" element={<ManageDonations />} />
+            <Route path="/admin/gallery" element={<ManageGallery />} />
+            <Route path="/admin/content" element={<ManageContent />} />
+            <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/temples" element={<ManageTemples />} />
+            <Route path="/admin/sevas" element={<ManageSevas />} />
+            <Route path="/admin/settings" element={<Settings />} />
+            
+            {/* Public Routes with Layout */}
+            <Route path="/" element={
+              <>
+                <Header />
+                <main>
+                  <Home />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/about" element={
+              <>
+                <Header />
+                <main>
+                  <About />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/services" element={
+              <>
+                <Header />
+                <main>
+                  <Services />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/booking" element={
+              <>
+                <Header />
+                <main>
+                  <Booking />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/gallery" element={
+              <>
+                <Header />
+                <main>
+                  <Gallery />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/contact" element={
+              <>
+                <Header />
+                <main>
+                  <Contact />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/latest-news" element={
+              <>
+                <Header />
+                <main>
+                  <LatestNews />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/live-status" element={
+              <>
+                <Header />
+                <main>
+                  <LiveStatus />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/rooms-donor" element={
+              <>
+                <Header />
+                <main>
+                  <RoomsDonor />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/my-history" element={
+              <>
+                <Header />
+                <main>
+                  <MyHistory />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/panchanga" element={
+              <>
+                <Header />
+                <main>
+                  <Panchanga />
+                </main>
+                <Footer />
+              </>
+            } />
+          </Routes>
+          </div>
+        </Router>
+      </DataProvider>
+    </AuthProvider>
   );
 }
 

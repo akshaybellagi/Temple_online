@@ -1,14 +1,22 @@
 {
-  "name": "temple-management-system",
+  "name": "temple-online-firebase",
   "version": "1.0.0",
   "private": true,
+  "description": "Temple management system with Firebase backend",
   "scripts": {
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && npm install",
     "install:all": "npm run install:frontend && npm run install:backend",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:frontend": "cd frontend && npm start",
-    "start:backend": "cd backend && npm start",
-    "build:frontend": "cd frontend && npm run build"
+    "start:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "cd frontend && npm test"
   },
-  "description": "Temple Management System - Full Stack Application"
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["temple", "management", "firebase", "react", "nodejs"],
+  "author": "Temple Online Team",
+  "license": "MIT"
 }

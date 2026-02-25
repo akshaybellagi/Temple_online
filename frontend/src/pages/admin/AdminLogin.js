@@ -23,11 +23,15 @@ function AdminLogin() {
     setLoading(true);
 
     try {
+      console.log('Attempting login with:', credentials);
+      
       // Call admin login API
       const data = await apiClient.adminLogin(credentials.username, credentials.password);
+      
+      console.log('Login response:', data);
 
       if (!data.success) {
-        alert('Invalid credentials! Use username: admin, password: admin123');
+        alert('Invalid credentials! Use any username and password for demo.');
         setLoading(false);
         return;
       }
@@ -35,10 +39,14 @@ function AdminLogin() {
       // Store admin session
       localStorage.setItem('adminLoggedIn', 'true');
       localStorage.setItem('adminUser', JSON.stringify(data.user));
+      
+      console.log('Navigating to dashboard...');
       navigate('/admin/dashboard');
+      
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login failed. Please try again.');
+      alert('Login failed: ' + error.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -82,9 +90,9 @@ function AdminLogin() {
         </form>
 
         <div className="login-info">
-          <p>Demo Credentials:</p>
-          <p><strong>Username:</strong> admin</p>
-          <p><strong>Password:</strong> admin123</p>
+          <p>Demo Mode - Use any credentials:</p>
+          <p><strong>Username:</strong> admin (or any text)</p>
+          <p><strong>Password:</strong> admin (or any text)</p>
         </div>
       </div>
     </div>

@@ -29,37 +29,7 @@ export const DataProvider = ({ children }) => {
   const fetchRooms = async () => {
     try {
       const roomsData = await apiClient.getRooms();
-
-      // Group rooms by name and create types array
-      const roomsMap = {};
-      
-      roomsData.forEach(room => {
-        if (!roomsMap[room.name]) {
-          roomsMap[room.name] = {
-            id: room.id,
-            name: room.name,
-            image: room.image || 'https://via.placeholder.com/300x200/3498db/ffffff?text=Room',
-            lift: room.lift,
-            types: []
-          };
-        }
-        
-        // Add this room as a type
-        roomsMap[room.name].types.push({
-          id: room.id,
-          name: room.type,
-          price: room.price,
-          available: room.available || 0,
-          total: room.total || 0,
-          floor: room.floor,
-          occupancy: room.occupancy,
-          commode_type: room.commode_type,
-          ac: room.ac
-        });
-      });
-
-      const roomsWithTypes = Object.values(roomsMap);
-      setRooms(roomsWithTypes);
+      setRooms(roomsData || []);
     } catch (error) {
       console.error('Error fetching rooms:', error);
       setRooms([]);
@@ -70,9 +40,10 @@ export const DataProvider = ({ children }) => {
   const fetchMarriageHalls = async () => {
     try {
       const data = await apiClient.getMarriageHalls();
-      setMarriageHalls(data);
+      setMarriageHalls(data || []);
     } catch (error) {
       console.error('Error fetching marriage halls:', error);
+      setMarriageHalls([]);
     }
   };
 
@@ -80,9 +51,10 @@ export const DataProvider = ({ children }) => {
   const fetchBookings = async () => {
     try {
       const data = await apiClient.getBookings();
-      setBookings(data);
+      setBookings(data || []);
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      setBookings([]);
     }
   };
 
@@ -90,9 +62,10 @@ export const DataProvider = ({ children }) => {
   const fetchDonations = async () => {
     try {
       const data = await apiClient.getDonations();
-      setDonations(data);
+      setDonations(data || []);
     } catch (error) {
       console.error('Error fetching donations:', error);
+      setDonations([]);
     }
   };
 
@@ -100,9 +73,10 @@ export const DataProvider = ({ children }) => {
   const fetchGalleryImages = async () => {
     try {
       const data = await apiClient.getGalleryImages();
-      setGalleryImages(data);
+      setGalleryImages(data || []);
     } catch (error) {
       console.error('Error fetching gallery images:', error);
+      setGalleryImages([]);
     }
   };
 
@@ -110,14 +84,24 @@ export const DataProvider = ({ children }) => {
   const fetchSiteContent = async () => {
     try {
       const data = await apiClient.getSiteContent();
-
       const contentObj = {};
-      data.forEach(item => {
-        contentObj[item.key] = item.value;
+      if (Array.isArray(data)) {
+        data.forEach(item => {
+          contentObj[item.key] = item.value;
+        });
+      }
+      setSiteContent({
+        about: contentObj.about || '',
+        services: contentObj.services || '',
+        contact: contentObj.contact || ''
       });
-      setSiteContent(contentObj);
     } catch (error) {
       console.error('Error fetching site content:', error);
+      setSiteContent({
+        about: '',
+        services: '',
+        contact: ''
+      });
     }
   };
 
