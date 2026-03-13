@@ -5,7 +5,6 @@ A modern, comprehensive temple management system built with React frontend and F
 ![Temple Online](https://img.shields.io/badge/Temple-Online-red?style=for-the-badge&logo=firebase)
 ![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)
 ![Firebase](https://img.shields.io/badge/Firebase-10.7-orange?style=flat-square&logo=firebase)
-![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js)
 
 ## 🌟 Features
 
@@ -20,7 +19,6 @@ A modern, comprehensive temple management system built with React frontend and F
 - Temple information and timings management
 - Service scheduling and management
 - Real-time updates with Firestore
-- Smart timings formatting (Morning | Evening display)
 
 ### 🙏 **Seva (Religious Services) Management**
 - Create and manage various sevas
@@ -58,20 +56,13 @@ A modern, comprehensive temple management system built with React frontend and F
 - Clean and intuitive interface
 - Accessibility compliant
 - Fast loading and smooth navigation
-- Error-free React rendering
-
-### 🛠️ **Developer Features**
-- Utility functions for data formatting
-- Consistent error handling
-- Type-safe data processing
-- Reusable components
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+ installed
 - Git installed
-- Firebase account (optional for demo mode)
+- Firebase account
 
 ### 1. Clone Repository
 ```bash
@@ -84,19 +75,16 @@ cd Temple_online
 npm run install:all
 ```
 
-### 3. Start in Demo Mode
+### 3. Start Application
 ```bash
 npm start
 ```
 
-The application will start in demo mode with:
-- **Backend**: http://localhost:5001
+The application will start at:
 - **Frontend**: http://localhost:3000
-- **Sample Data**: Pre-loaded temples and sevas
 
 ### 4. Access Admin Panel
 - **URL**: http://localhost:3000/admin/login
-- **Demo Credentials**: Any username/password works in demo mode
 
 ## 🔧 Tech Stack
 
@@ -107,46 +95,18 @@ The application will start in demo mode with:
 - **CSS3** - Custom styling with responsive design
 - **Firebase SDK** - Client-side Firebase integration
 
-### **Backend**
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **Firebase Admin SDK** - Server-side Firebase
-- **Multer** - File upload handling
-- **CORS** - Cross-origin resource sharing
-
 ### **Database & Storage**
 - **Firestore** - NoSQL document database
 - **Firebase Storage** - File storage service
 - **Firebase Auth** - Authentication service
 
-### **Development Tools**
-- **Nodemon** - Development server
-- **Concurrently** - Run multiple scripts
-- **ESLint** - Code linting
-- **Git** - Version control
-
 ## 📁 Project Structure
 
 ```
 temple-online/
-├── 📁 backend/                 # Firebase backend
-│   ├── 📁 routes/             # API routes
-│   │   ├── auth.js           # Authentication routes
-│   │   ├── temples.js        # Temple management
-│   │   ├── sevas.js          # Seva management
-│   │   ├── bookings.js       # Booking system
-│   │   ├── donations.js      # Donation handling
-│   │   ├── gallery.js        # Image management
-│   │   └── admin.js          # Admin operations
-│   ├── firebaseConfig.js     # Firebase configuration
-│   ├── server.js             # Express server
-│   ├── firebase.json         # Firebase project config
-│   ├── firestore.rules       # Database security rules
-│   └── storage.rules         # Storage security rules
 ├── 📁 frontend/               # React frontend
 │   ├── 📁 src/
 │   │   ├── 📁 components/    # Reusable components
-│   │   │   └── AdminRoute.js # Route protection component
 │   │   ├── 📁 pages/         # Page components
 │   │   │   ├── 📁 admin/     # Admin panel pages
 │   │   │   └── ...           # Public pages
@@ -154,213 +114,183 @@ temple-online/
 │   │   │   ├── AuthContext.js    # Authentication
 │   │   │   └── DataContext.js    # Data management
 │   │   ├── 📁 utils/         # Utility functions
-│   │   │   └── formatters.js # Data formatting utilities
 │   │   ├── firebaseConfig.js # Firebase client config
-│   │   └── apiClient.js      # API communication
+│   │   └── apiClient.js      # Firebase API client
 │   └── 📁 public/            # Static assets
 ├── 📄 README.md              # This file
-├── 📄 FIREBASE_SETUP.md      # Firebase setup guide
 └── 📄 package.json           # Root package configuration
 ```
 
-## 🔥 Firebase Setup (Production)
+## 🔥 Firebase Configuration
 
-For production deployment with real Firebase:
+Your Firebase configuration is now set up with the following credentials:
 
-### 1. Create Firebase Project
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create new project
-3. Enable Authentication, Firestore, and Storage
-
-### 2. Configure Environment
-```bash
-# Backend (.env)
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY="your-private-key"
-FIREBASE_CLIENT_EMAIL=your-client-email
-# ... other Firebase credentials
-
-# Frontend (.env)
-REACT_APP_FIREBASE_API_KEY=your-api-key
-REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=your-project-id
-# ... other Firebase config
+```javascript
+const firebaseConfig = {
+  apiKey: "AIzaSyAbK2WpPQEonNZa4C3Vkl_gbbc7tQ53Hi4",
+  authDomain: "helmets-store-eaaea.firebaseapp.com",
+  projectId: "helmets-store-eaaea",
+  storageBucket: "helmets-store-eaaea.firebasestorage.app",
+  messagingSenderId: "32286703885",
+  appId: "1:32286703885:web:c57d3096d07d6baecef044",
+  measurementId: "G-H6NMQX65Y8"
+};
 ```
 
-### 3. Deploy Security Rules
-```bash
-cd backend
-firebase login
-firebase use your-project-id
-firebase deploy --only firestore:rules,storage
+### Firebase Services Enabled
+- **Authentication** - User login/registration
+- **Firestore Database** - Data storage
+- **Storage** - File uploads
+- **Analytics** - Usage tracking
+
+## 📚 Firebase Collections Structure
+
+The application uses the following Firestore collections:
+
+### Users Collection (`users`)
+```javascript
+{
+  id: "user-id",
+  email: "user@example.com",
+  displayName: "User Name",
+  role: "user" | "admin",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
 ```
 
-### 4. Initialize Sample Data
-```bash
-cd backend
-npm run init-data
+### Temples Collection (`temples`)
+```javascript
+{
+  id: "temple-id",
+  name: "Temple Name",
+  location: "Temple Location",
+  description: "Temple Description",
+  timings: "6:00 AM - 9:00 PM",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
 ```
 
-Detailed setup instructions: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
-
-## 🎯 Demo Mode
-
-The application includes a comprehensive demo mode that works without Firebase setup:
-
-### Features
-- ✅ **In-memory data storage** - No external dependencies
-- ✅ **Sample data** - Pre-loaded temples, sevas, and settings
-- ✅ **Mock authentication** - Any credentials work
-- ✅ **Full functionality** - All features available
-- ✅ **Fast development** - Instant setup and testing
-- ✅ **Error-free operation** - Robust data handling
-
-### Sample Data Included
-- **Temple**: "Sample Temple" with complete information and timings
-- **Sevas**: Abhishekam (₹500), Archana (₹100), Aarti (₹200)
-- **Settings**: Site content and configuration
-- **Admin Access**: Use any username/password
-
-### Demo Credentials
-- **Username**: Any text (e.g., "admin")
-- **Password**: Any text (e.g., "admin")
-- **Admin Panel**: http://localhost:3000/admin/login
-
-## 📚 API Documentation
-
-### Authentication Endpoints
-```
-POST /api/auth/register          # Register new user
-GET  /api/auth/profile/:uid      # Get user profile
-PUT  /api/auth/profile/:uid      # Update user profile
+### Sevas Collection (`sevas`)
+```javascript
+{
+  id: "seva-id",
+  name: "Seva Name",
+  description: "Seva Description",
+  price: 500,
+  duration: "30 minutes",
+  templeId: "temple-id",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
 ```
 
-### Temple Management
-```
-GET    /api/temples              # Get all temples
-GET    /api/temples/:id          # Get temple by ID
-POST   /api/temples              # Create temple (admin)
-PUT    /api/temples/:id          # Update temple (admin)
-DELETE /api/temples/:id          # Delete temple (admin)
-```
-
-### Seva Management
-```
-GET    /api/sevas                # Get all sevas
-GET    /api/sevas/temple/:id     # Get sevas by temple
-POST   /api/sevas                # Create seva (admin)
-PUT    /api/sevas/:id            # Update seva (admin)
-DELETE /api/sevas/:id            # Delete seva (admin)
+### Bookings Collection (`bookings`)
+```javascript
+{
+  id: "booking-id",
+  userId: "user-id",
+  sevaId: "seva-id",
+  templeId: "temple-id",
+  date: "2026-03-15",
+  time: "10:00 AM",
+  status: "pending" | "confirmed" | "cancelled",
+  amount: 500,
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
 ```
 
-### Booking System
-```
-GET    /api/bookings             # Get all bookings (admin)
-GET    /api/bookings/user/:uid   # Get user bookings
-POST   /api/bookings             # Create booking
-PUT    /api/bookings/:id/status  # Update booking status
-DELETE /api/bookings/:id         # Delete booking
-```
-
-### Donation Management
-```
-GET    /api/donations            # Get all donations (admin)
-GET    /api/donations/user/:uid  # Get user donations
-POST   /api/donations            # Create donation
-PUT    /api/donations/:id/status # Update donation status
+### Donations Collection (`donations`)
+```javascript
+{
+  id: "donation-id",
+  userId: "user-id",
+  amount: 1000,
+  purpose: "General Donation",
+  status: "pending" | "completed",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
 ```
 
-### Gallery Management
-```
-GET    /api/gallery              # Get all images
-POST   /api/gallery/upload       # Upload image (admin)
-PUT    /api/gallery/:id          # Update image (admin)
-DELETE /api/gallery/:id          # Delete image (admin)
-```
-
-### Admin Operations
-```
-GET /api/admin/dashboard/stats   # Dashboard statistics
-GET /api/admin/users             # Get all users
-PUT /api/admin/users/:id/role    # Update user role
-GET /api/admin/settings          # Get system settings
-PUT /api/admin/settings          # Update system settings
+### Gallery Collection (`gallery`)
+```javascript
+{
+  id: "image-id",
+  title: "Image Title",
+  description: "Image Description",
+  category: "festival" | "temple" | "general",
+  imageUrl: "https://storage.googleapis.com/...",
+  storagePath: "gallery/image.jpg",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
 ```
 
 ## 🛡️ Security Features
 
-### Database Security
-- **Firestore Rules** - Role-based data access
-- **Input Validation** - Server-side validation
-- **Authentication Required** - Protected endpoints
-- **Admin Verification** - Admin-only operations
-- **Data Sanitization** - Clean data processing
+### Firestore Security Rules
+Configure these rules in your Firebase Console:
 
-### File Upload Security
-- **Storage Rules** - Secure file access
-- **File Type Validation** - Image uploads only
-- **Size Limits** - 5MB maximum file size
-- **Public URL Generation** - Secure file serving
-
-### Authentication Security
-- **Firebase Auth** - Industry-standard security
-- **Session Management** - Secure token handling
-- **Role-based Access** - User/Admin permissions
-- **Password Security** - Firebase password policies
-
-### Code Quality & Reliability
-- **Error Handling** - Comprehensive error management
-- **Type Safety** - Proper data type handling
-- **React Best Practices** - Clean component architecture
-- **Utility Functions** - Reusable, tested code
-
-## � Utility Functions
-
-The application includes a comprehensive set of utility functions for consistent data handling:
-
-### Data Formatting (`formatters.js`)
-
-#### `formatTimings(timings)`
-Handles temple timings display consistently:
 ```javascript
-// Object format
-formatTimings({morning: "6:00 AM - 12:00 PM", evening: "4:00 PM - 9:00 PM"})
-// Returns: "6:00 AM - 12:00 PM | 4:00 PM - 9:00 PM"
-
-// String format
-formatTimings("6:00 AM - 9:00 PM")
-// Returns: "6:00 AM - 9:00 PM"
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Public read access for temples and sevas
+    match /temples/{document} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    match /sevas/{document} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Users can read their own bookings/donations
+    match /bookings/{document} {
+      allow read, write: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    match /donations/{document} {
+      allow read, write: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    // Gallery - public read, admin write
+    match /gallery/{document} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}
 ```
 
-#### `formatCurrency(amount)`
-Formats monetary amounts with Indian locale:
+### Storage Security Rules
 ```javascript
-formatCurrency(1500)
-// Returns: "₹1,500"
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
 ```
-
-#### `formatDate(date)` & `formatTime(time)`
-Consistent date and time formatting:
-```javascript
-formatDate(new Date())
-// Returns: "25 Feb, 2026"
-
-formatTime(new Date())
-// Returns: "2:30 PM"
-```
-
-#### `parseTimings(timingsString)`
-Converts string timings to object format:
-```javascript
-parseTimings("6:00 AM - 12:00 PM | 4:00 PM - 9:00 PM")
-// Returns: {morning: "6:00 AM - 12:00 PM", evening: "4:00 PM - 9:00 PM"}
-```
-
-### Benefits
-- **Consistency** - Uniform data display across the application
-- **Reliability** - Handles edge cases and invalid data gracefully
-- **Reusability** - Functions can be used throughout the codebase
-- **Maintainability** - Centralized formatting logic
 
 ## 🚀 Deployment
 
@@ -370,77 +300,88 @@ parseTimings("6:00 AM - 12:00 PM | 4:00 PM - 9:00 PM")
 cd frontend
 npm run build
 
-# Deploy to Firebase
-cd ../backend
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login and initialize
+firebase login
+firebase init hosting
+
+# Deploy
 firebase deploy
 ```
 
-### Custom Server
-```bash
-# Build frontend
-npm run build:frontend
+### Vercel Deployment
+The project includes `vercel.json` for easy Vercel deployment:
 
-# Start production server
-cd backend
-npm start
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel
 ```
 
-### Environment Variables
-Ensure all environment variables are configured for production deployment.
+## 🔧 Development
+
+### Start Development Server
+```bash
+# Start frontend only
+npm start
+
+# Or use the shell script (macOS/Linux)
+./start-dev.sh
+
+# Or use the batch file (Windows)
+start-dev.bat
+```
+
+### Available Scripts
+```bash
+npm run install:all      # Install frontend dependencies
+npm start               # Start development server
+npm run build          # Build for production
+npm test               # Run tests
+```
+
+## 📱 Features Overview
+
+### Public Features
+- **Home Page** - Temple information and services
+- **About** - Temple history and information
+- **Services** - Available sevas and pricing
+- **Gallery** - Temple photos and events
+- **Contact** - Contact information and location
+- **Booking** - Service booking system
+- **User Registration/Login** - Account management
+
+### Admin Features
+- **Dashboard** - Statistics and overview
+- **Manage Temples** - Add/edit temple information
+- **Manage Sevas** - Service management
+- **Manage Bookings** - Booking oversight
+- **Manage Donations** - Donation tracking
+- **Manage Gallery** - Image management
+- **Manage Users** - User administration
+- **Settings** - System configuration
 
 ## 🔧 Troubleshooting
 
-### Common Issues & Solutions
+### Common Issues
 
-#### React Rendering Errors
-**Problem**: "Objects are not valid as a React child"  
-**Solution**: Use utility functions like `formatTimings()` to properly format object data for display.
+#### Firebase Connection
+- Ensure Firebase project is properly configured
+- Check that Authentication, Firestore, and Storage are enabled
+- Verify security rules are set up correctly
 
-#### Firebase Connection Issues
-**Problem**: Firebase initialization errors  
-**Solution**: 
-1. Check environment variables in `.env` files
-2. Verify Firebase project configuration
-3. Ensure service account credentials are correct
-4. Use demo mode for development: `DEMO_MODE=true`
+#### Build Errors
+- Clear node_modules and reinstall: `rm -rf frontend/node_modules && cd frontend && npm install`
+- Check for any missing dependencies
 
-#### Port Conflicts
-**Problem**: "EADDRINUSE: address already in use"  
-**Solution**: 
-1. Change ports in `.env` files (backend: PORT=5001, frontend: 3000)
-2. Kill existing processes: `lsof -ti:5001 | xargs kill`
-
-#### Admin Login Issues
-**Problem**: Blank page after login  
-**Solution**: 
-1. Check browser console for errors
-2. Verify localStorage is enabled
-3. Clear browser cache and localStorage
-4. Use any credentials in demo mode
-
-#### API Connection Errors
-**Problem**: Frontend can't connect to backend  
-**Solution**: 
-1. Ensure backend is running on correct port (5001)
-2. Check `REACT_APP_API_URL` in frontend `.env`
-3. Verify CORS settings in backend
-
-### Debug Mode
-Enable debug logging by setting:
-```bash
-# Backend
-NODE_ENV=development
-
-# Frontend
-REACT_APP_DEBUG=true
-```
-
-### Getting Help
-1. Check browser console for detailed error messages
-2. Review server logs for backend issues
-3. Verify all environment variables are set correctly
-4. Test API endpoints directly with curl
-5. Use demo mode to isolate Firebase-related issues
+#### Authentication Issues
+- Verify Firebase Auth is enabled in console
+- Check that email/password provider is enabled
+- Ensure proper error handling in AuthContext
 
 ## 🤝 Contributing
 
@@ -450,60 +391,18 @@ REACT_APP_DEBUG=true
 4. **Push** to the branch (`git push origin feature/amazing-feature`)
 5. **Open** a Pull Request
 
-### Development Guidelines
-- Follow existing code style and patterns
-- Add comments for complex logic
-- Test thoroughly before submitting
-- Update documentation as needed
-
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ## 👥 Authors
 
 - **Akshay Bellagi** - *Initial work* - [@akshaybellagi](https://github.com/akshaybellagi)
 
-## 🙏 Acknowledgments
-
-- Firebase team for excellent backend services
-- React community for amazing frontend framework
-- Open source contributors for various libraries used
-- Temple management community for feature insights
-
 ## 📞 Support
 
-For support, email [support@temple-online.com](mailto:support@temple-online.com) or create an issue on GitHub.
-
-## � Recent Updates
-
-### v2.1.0 - Latest (February 2026)
-- 🐛 **Fixed**: React rendering error for temple timings object
-- ✨ **Added**: Comprehensive utility functions for data formatting
-- 🔧 **Enhanced**: Backend timings processing and validation
-- 📚 **Improved**: Documentation with troubleshooting guide
-- 🛡️ **Strengthened**: Error handling and data validation
-
-### v2.0.0 - Firebase Migration
-- 🔥 **Complete**: Migration from MySQL to Firebase
-- ⚡ **Added**: Real-time data synchronization
-- 🔐 **Enhanced**: Authentication with Firebase Auth
-- 📱 **Improved**: Admin dashboard with better UX
-- 🎯 **Added**: Demo mode for easy development
-
-### v1.0.0 - Initial Release
-- 🏛️ **Core**: Temple management system
-- 📅 **Features**: Booking and donation systems
-- 👥 **Admin**: Complete administrative interface
-- 🎨 **UI**: Responsive design implementation
-
-## 🔗 Links
-
-- **Repository**: [https://github.com/akshaybellagi/Temple_online](https://github.com/akshaybellagi/Temple_online)
-- **Demo**: [Live Demo](https://temple-online-demo.web.app) *(Coming Soon)*
-- **Documentation**: [Firebase Setup Guide](FIREBASE_SETUP.md)
-- **Issues**: [Report Issues](https://github.com/akshaybellagi/Temple_online/issues)
+For support, create an issue on GitHub.
 
 ---
 
-**Built with ❤️ for the temple community**
+**Built with ❤️ for the temple community using Firebase**

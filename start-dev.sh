@@ -5,40 +5,15 @@
 echo "🚀 Starting Temple Online Firebase System..."
 echo ""
 
-# Start backend server
-echo "🔧 Starting Firebase Backend API Server..."
-cd backend
+# Start frontend only (Firebase handles backend)
+echo "⚛️  Starting React Frontend with Firebase..."
+cd frontend
 
 # Check if .env exists
 if [ ! -f .env ]; then
     echo "⚠️  .env file not found. Creating from .env.example..."
     cp .env.example .env
-    echo "✅ .env file created. Please update it with your Firebase credentials."
-    echo ""
-fi
-
-# Check if node_modules exists
-if [ ! -d node_modules ]; then
-    echo "📦 Installing backend dependencies..."
-    npm install
-    echo ""
-fi
-
-npm run dev &
-BACKEND_PID=$!
-
-# Wait for backend to start
-sleep 3
-
-# Start frontend
-echo "⚛️  Starting React Frontend..."
-cd ../frontend
-
-# Check if .env exists
-if [ ! -f .env ]; then
-    echo "⚠️  .env file not found. Creating from .env.example..."
-    cp .env.example .env
-    echo "✅ .env file created. Please update it with your Firebase credentials."
+    echo "✅ .env file created."
     echo ""
 fi
 
@@ -49,7 +24,6 @@ if [ ! -d node_modules ]; then
     echo ""
 fi
 
+echo "🔥 Firebase configuration is set up directly in the app"
+echo "📱 Starting React development server..."
 npm start
-
-# Cleanup on exit
-trap "kill $BACKEND_PID" EXIT

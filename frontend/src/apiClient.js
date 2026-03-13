@@ -1,239 +1,527 @@
-// API client for Firebase backend
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Firebase API client - Direct Firebase operations
+import { 
+  collection, 
+  doc, 
+  getDocs, 
+  getDoc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  where, 
+  orderBy,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { 
+  ref, 
+  uploadBytes, 
+  getDownloadURL, 
+  deleteObject 
+} from 'firebase/storage';
+import { db, storage } from './firebaseConfig';
 
 class ApiClient {
-  async request(endpoint, options = {}) {
-    const url = `${API_URL}${endpoint}`;
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
+  // Helper method to convert Firestore document to object
+  docToObject(doc) {
+    return { id: doc.id, ...doc.data() };
+  }
 
+  // Auth - User profiles
+  async getUserProfile(uid) {
     try {
-      const response = await fetch(url, config);
+      const docRef = doc(db, 'users', uid);
+      const docSnap = await getDoc(docRef);
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Request failed');
+      if (docSnap.exists()) {
+        return this.docToObject(docSnap);
+      } else {
+        throw new Error('User profile not found');
       }
-      
-      return await response.json();
     } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
+      console.error('Error getting user profile:', error);
       throw error;
     }
   }
 
-  // Auth
-  async register(userData) {
-    return this.request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
-  }
-
-  async getUserProfile(uid) {
-    return this.request(`/auth/profile/${uid}`);
-  }
-
   async updateUserProfile(uid, updates) {
-    return this.request(`/auth/profile/${uid}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
+    try {
+      const docRef = doc(db, 'users', uid);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  }
+
+  async register(userData) {
+    try {
+      const docRef = await addDoc(collection(db, 'users'), {
+        ...userData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: docRef.id, ...userData };
+    } catch (error) {
+      console.error('Error registering user:', error);
+      throw error;
+    }
   }
 
   // Temples
   async getTemples() {
-    return this.request('/temples');
+    try {
+      const querySnapshot = await getDocs(collection(db, 'temples'));
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting temples:', error);
+      throw error;
+    }
   }
 
   async getTemple(id) {
-    return this.request(`/temples/${id}`);
+    try {
+      const docRef = doc(db, 'temples', id);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return this.docToObject(docSnap);
+      } else {
+        throw new Error('Temple not found');
+      }
+    } catch (error) {
+      console.error('Error getting temple:', error);
+      throw error;
+    }
   }
 
   async createTemple(temple) {
-    return this.request('/temples', {
-      method: 'POST',
-      body: JSON.stringify(temple),
-    });
+    try {
+      const docRef = await addDoc(collection(db, 'temples'), {
+        ...temple,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: docRef.id, ...temple };
+    } catch (error) {
+      console.error('Error creating temple:', error);
+      throw error;
+    }
   }
 
   async updateTemple(id, updates) {
-    return this.request(`/temples/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
+    try {
+      const docRef = doc(db, 'temples', id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating temple:', error);
+      throw error;
+    }
   }
 
   async deleteTemple(id) {
-    return this.request(`/temples/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      await deleteDoc(doc(db, 'temples', id));
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting temple:', error);
+      throw error;
+    }
   }
 
   // Sevas
   async getSevas() {
-    return this.request('/sevas');
+    try {
+      const querySnapshot = await getDocs(collection(db, 'sevas'));
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting sevas:', error);
+      throw error;
+    }
   }
 
   async getSevasByTemple(templeId) {
-    return this.request(`/sevas/temple/${templeId}`);
+    try {
+      const q = query(collection(db, 'sevas'), where('templeId', '==', templeId));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting sevas by temple:', error);
+      throw error;
+    }
   }
 
   async createSeva(seva) {
-    return this.request('/sevas', {
-      method: 'POST',
-      body: JSON.stringify(seva),
-    });
+    try {
+      const docRef = await addDoc(collection(db, 'sevas'), {
+        ...seva,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: docRef.id, ...seva };
+    } catch (error) {
+      console.error('Error creating seva:', error);
+      throw error;
+    }
   }
 
   async updateSeva(id, updates) {
-    return this.request(`/sevas/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
+    try {
+      const docRef = doc(db, 'sevas', id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating seva:', error);
+      throw error;
+    }
   }
 
   async deleteSeva(id) {
-    return this.request(`/sevas/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      await deleteDoc(doc(db, 'sevas', id));
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting seva:', error);
+      throw error;
+    }
   }
 
   // Bookings
   async getBookings() {
-    return this.request('/bookings');
+    try {
+      const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting bookings:', error);
+      throw error;
+    }
   }
 
   async getUserBookings(userId) {
-    return this.request(`/bookings/user/${userId}`);
+    try {
+      const q = query(
+        collection(db, 'bookings'), 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting user bookings:', error);
+      throw error;
+    }
   }
 
   async createBooking(booking) {
-    return this.request('/bookings', {
-      method: 'POST',
-      body: JSON.stringify(booking),
-    });
+    try {
+      const docRef = await addDoc(collection(db, 'bookings'), {
+        ...booking,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: docRef.id, ...booking };
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
+    }
   }
 
   async updateBookingStatus(id, status) {
-    return this.request(`/bookings/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    });
+    try {
+      const docRef = doc(db, 'bookings', id);
+      await updateDoc(docRef, {
+        status,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      throw error;
+    }
+  }
+
+  async updateBooking(id, updates) {
+    try {
+      const docRef = doc(db, 'bookings', id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      throw error;
+    }
   }
 
   async deleteBooking(id) {
-    return this.request(`/bookings/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      await deleteDoc(doc(db, 'bookings', id));
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      throw error;
+    }
   }
 
   // Donations
   async getDonations() {
-    return this.request('/donations');
+    try {
+      const q = query(collection(db, 'donations'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting donations:', error);
+      throw error;
+    }
   }
 
   async getUserDonations(userId) {
-    return this.request(`/donations/user/${userId}`);
+    try {
+      const q = query(
+        collection(db, 'donations'), 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting user donations:', error);
+      throw error;
+    }
   }
 
   async createDonation(donation) {
-    return this.request('/donations', {
-      method: 'POST',
-      body: JSON.stringify(donation),
-    });
+    try {
+      const docRef = await addDoc(collection(db, 'donations'), {
+        ...donation,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: docRef.id, ...donation };
+    } catch (error) {
+      console.error('Error creating donation:', error);
+      throw error;
+    }
   }
 
   async updateDonationStatus(id, status) {
-    return this.request(`/donations/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    });
+    try {
+      const docRef = doc(db, 'donations', id);
+      await updateDoc(docRef, {
+        status,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating donation status:', error);
+      throw error;
+    }
+  }
+
+  async updateDonation(id, updates) {
+    try {
+      const docRef = doc(db, 'donations', id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating donation:', error);
+      throw error;
+    }
   }
 
   // Gallery
   async getGalleryImages() {
-    return this.request('/gallery');
+    try {
+      const q = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting gallery images:', error);
+      throw error;
+    }
   }
 
   async uploadGalleryImage(formData) {
-    return this.request('/gallery/upload', {
-      method: 'POST',
-      body: formData,
-      headers: {}, // Let browser set Content-Type for FormData
-    });
+    try {
+      const file = formData.get('image');
+      const title = formData.get('title') || '';
+      const description = formData.get('description') || '';
+      const category = formData.get('category') || 'general';
+
+      // Upload image to Firebase Storage
+      const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      // Save metadata to Firestore
+      const docRef = await addDoc(collection(db, 'gallery'), {
+        title,
+        description,
+        category,
+        imageUrl: downloadURL,
+        storagePath: snapshot.ref.fullPath,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      return { 
+        id: docRef.id, 
+        title, 
+        description, 
+        category, 
+        imageUrl: downloadURL 
+      };
+    } catch (error) {
+      console.error('Error uploading gallery image:', error);
+      throw error;
+    }
+  }
+
+  async createGalleryImage(image) {
+    // Convert to FormData format for consistency
+    const formData = new FormData();
+    if (image.file) {
+      formData.append('image', image.file);
+    }
+    if (image.title) formData.append('title', image.title);
+    if (image.description) formData.append('description', image.description);
+    if (image.category) formData.append('category', image.category);
+    
+    return this.uploadGalleryImage(formData);
   }
 
   async updateGalleryImage(id, updates) {
-    return this.request(`/gallery/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
+    try {
+      const docRef = doc(db, 'gallery', id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating gallery image:', error);
+      throw error;
+    }
   }
 
   async deleteGalleryImage(id) {
-    return this.request(`/gallery/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      // Get the document to find the storage path
+      const docRef = doc(db, 'gallery', id);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        
+        // Delete from storage if path exists
+        if (data.storagePath) {
+          const storageRef = ref(storage, data.storagePath);
+          await deleteObject(storageRef);
+        }
+      }
+      
+      // Delete from Firestore
+      await deleteDoc(docRef);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting gallery image:', error);
+      throw error;
+    }
   }
 
-  // Rooms (for backward compatibility - map to temples/sevas)
+  // Marriage Halls
+  async getMarriageHalls() {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'halls'));
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting marriage halls:', error);
+      throw error;
+    }
+  }
+
+  async createMarriageHall(hall) {
+    try {
+      const docRef = await addDoc(collection(db, 'halls'), {
+        ...hall,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return { id: docRef.id, ...hall };
+    } catch (error) {
+      console.error('Error creating marriage hall:', error);
+      throw error;
+    }
+  }
+
+  async updateMarriageHall(id, updates) {
+    try {
+      const docRef = doc(db, 'halls', id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating marriage hall:', error);
+      throw error;
+    }
+  }
+
+  async deleteMarriageHall(id) {
+    try {
+      await deleteDoc(doc(db, 'halls', id));
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting marriage hall:', error);
+      throw error;
+    }
+  }
+
+  // Rooms (backward compatibility - map to temples)
   async getRooms() {
-    // In Firebase version, rooms are managed as temple accommodations
-    // Return empty array for now, can be implemented later if needed
-    return [];
+    return this.getTemples();
   }
 
   async createRoom(room) {
-    // Map to temple creation if needed
     return this.createTemple(room);
   }
 
   async updateRoom(id, updates) {
-    // Map to temple update if needed
     return this.updateTemple(id, updates);
   }
 
   async deleteRoom(id) {
-    // Map to temple deletion if needed
     return this.deleteTemple(id);
   }
 
-  // Marriage Halls (for backward compatibility - map to temples)
-  async getMarriageHalls() {
-    // In Firebase version, marriage halls are managed as temples
-    const temples = await this.getTemples();
-    return temples.filter(temple => temple.type === 'hall' || temple.category === 'marriage_hall');
-  }
-
-  async createMarriageHall(hall) {
-    return this.createTemple({ ...hall, type: 'hall', category: 'marriage_hall' });
-  }
-
-  async updateMarriageHall(id, updates) {
-    return this.updateTemple(id, updates);
-  }
-
-  async deleteMarriageHall(id) {
-    return this.deleteTemple(id);
-  }
-
-  // Site Content (for backward compatibility - map to settings)
+  // Site Content
   async getSiteContent() {
     try {
-      const settings = await this.getSettings();
-      // Convert settings to site content format
-      return [
-        { key: 'about', value: settings.aboutText || '' },
-        { key: 'services', value: settings.servicesText || '' },
-        { key: 'contact', value: settings.contactText || '' }
-      ];
+      const querySnapshot = await getDocs(collection(db, 'siteContent'));
+      return querySnapshot.docs.map(doc => ({
+        key: doc.id,
+        value: doc.data().content || ''
+      }));
     } catch (error) {
+      console.error('Error getting site content:', error);
       return [
         { key: 'about', value: '' },
         { key: 'services', value: '' },
@@ -242,43 +530,141 @@ class ApiClient {
     }
   }
 
-  // Admin
+  async upsertSiteContent(key, value) {
+    try {
+      const docRef = doc(db, 'siteContent', key);
+      await updateDoc(docRef, {
+        content: value,
+        updatedAt: serverTimestamp()
+      }).catch(async () => {
+        // Document doesn't exist, create it
+        await addDoc(collection(db, 'siteContent'), {
+          content: value,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error upserting site content:', error);
+      throw error;
+    }
+  }
+
+  // Admin functions
   async getDashboardStats() {
-    return this.request('/admin/dashboard/stats');
+    try {
+      const [temples, sevas, bookings, donations] = await Promise.all([
+        this.getTemples(),
+        this.getSevas(),
+        this.getBookings(),
+        this.getDonations()
+      ]);
+
+      return {
+        temples: temples.length,
+        sevas: sevas.length,
+        bookings: bookings.length,
+        donations: donations.length,
+        totalDonations: donations.reduce((sum, d) => sum + (d.amount || 0), 0)
+      };
+    } catch (error) {
+      console.error('Error getting dashboard stats:', error);
+      return {
+        temples: 0,
+        sevas: 0,
+        bookings: 0,
+        donations: 0,
+        totalDonations: 0
+      };
+    }
   }
 
   async getUsers() {
-    return this.request('/admin/users');
+    try {
+      const querySnapshot = await getDocs(collection(db, 'users'));
+      return querySnapshot.docs.map(doc => this.docToObject(doc));
+    } catch (error) {
+      console.error('Error getting users:', error);
+      throw error;
+    }
   }
 
   async updateUserRole(id, role) {
-    return this.request(`/admin/users/${id}/role`, {
-      method: 'PUT',
-      body: JSON.stringify({ role }),
-    });
+    try {
+      const docRef = doc(db, 'users', id);
+      await updateDoc(docRef, {
+        role,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw error;
+    }
   }
 
   async deactivateUser(id) {
-    return this.request(`/admin/users/${id}/deactivate`, {
-      method: 'PUT',
-    });
+    try {
+      const docRef = doc(db, 'users', id);
+      await updateDoc(docRef, {
+        active: false,
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      throw error;
+    }
   }
 
   async getSettings() {
-    return this.request('/admin/settings');
+    try {
+      const docRef = doc(db, 'settings', 'general');
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return docSnap.data();
+      } else {
+        // Return default settings
+        return {
+          siteName: 'Temple Management System',
+          aboutText: '',
+          servicesText: '',
+          contactText: ''
+        };
+      }
+    } catch (error) {
+      console.error('Error getting settings:', error);
+      throw error;
+    }
   }
 
   async updateSettings(settings) {
-    return this.request('/admin/settings', {
-      method: 'PUT',
-      body: JSON.stringify(settings),
-    });
+    try {
+      const docRef = doc(db, 'settings', 'general');
+      await updateDoc(docRef, {
+        ...settings,
+        updatedAt: serverTimestamp()
+      }).catch(async () => {
+        // Document doesn't exist, create it
+        await addDoc(collection(db, 'settings'), {
+          ...settings,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      throw error;
+    }
   }
 
-  // Admin Login (for backward compatibility)
+  // Admin Login (Firebase Auth based)
   async adminLogin(username, password) {
-    // In Firebase version, this could be mapped to Firebase Auth
-    // For demo mode, always return success for any credentials
+    // This should be handled by Firebase Auth in the AuthContext
+    // For backward compatibility, return a demo response
     console.log('Admin login attempt:', { username, password });
     
     return new Promise((resolve) => {
@@ -290,41 +676,10 @@ class ApiClient {
             username: username || 'admin',
             role: 'admin'
           },
-          token: 'demo-admin-token'
+          token: 'firebase-auth-token'
         });
-      }, 500); // Simulate API delay
+      }, 500);
     });
-  }
-
-  async upsertSiteContent(key, value) {
-    // Map to settings update
-    const updateData = {};
-    updateData[`${key}Text`] = value;
-    return this.updateSettings(updateData);
-  }
-
-  // Update booking (for backward compatibility)
-  async updateBooking(id, updates) {
-    return this.updateBookingStatus(id, updates.status || 'confirmed');
-  }
-
-  // Update donation (for backward compatibility)  
-  async updateDonation(id, updates) {
-    return this.updateDonationStatus(id, updates.status || 'completed');
-  }
-
-  // Create gallery image (for backward compatibility)
-  async createGalleryImage(image) {
-    // Convert to FormData if needed
-    const formData = new FormData();
-    if (image.file) {
-      formData.append('image', image.file);
-    }
-    if (image.title) formData.append('title', image.title);
-    if (image.description) formData.append('description', image.description);
-    if (image.category) formData.append('category', image.category);
-    
-    return this.uploadGalleryImage(formData);
   }
 }
 
